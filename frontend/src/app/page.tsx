@@ -1,6 +1,20 @@
 import Link from 'next/link';
-import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight } from 'lucide-react';
+import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight, CheckCircle2, Users, FileCheck } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
+
+const recruiterPoints = [
+  'AI structures your job post into clear, priced milestones in seconds',
+  'Get matched with vetted freelancers ranked by skill fit and track record',
+  'Every deliverable is audited against your criteria before you see it',
+  'Funds sit in escrow until work passes — you never pay for nothing',
+];
+
+const freelancerPoints = [
+  'Every job you’re matched to is already funded in escrow',
+  'Get AI feedback on your submission before the client sees a rough draft',
+  'Get paid the moment your work passes — straight to your bank or mobile money',
+  'Build a profile with an AI-generated resume from your skills and track record',
+];
 
 const steps = [
   {
@@ -31,13 +45,13 @@ export default function LandingPage() {
       {/* Nav */}
       <header className="border-b border-surface-border bg-white">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5">
             <LogoMark size={30} />
             <span className="font-bold text-lg">
               <span className="text-teal-700">Gig</span>
               <span className="text-orange-600">Huz</span>
             </span>
-          </div>
+          </Link>
           <Link href="/login" className="btn-ghost text-sm">Sign in</Link>
         </div>
       </header>
@@ -88,31 +102,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Two audiences */}
-      <section className="max-w-5xl mx-auto px-6 py-14">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="card space-y-3">
-            <span className="badge-teal">For Recruiters</span>
-            <h3 className="text-lg font-bold text-gray-900">Post a job, not a job description novel</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Skip the back-and-forth of scoping and vetting. Describe what you need,
-              let AI structure it into milestones, and get matched with talent that's
-              actually qualified — every deliverable is audited before it reaches you.
+      {/* Two audiences — big, color-differentiated, side by side */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="text-center mb-10">
+          <p className="section-label mb-2">Two sides, one platform</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Whichever side of the deal you're on
+          </h2>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+          {/* Hire Talent — teal */}
+          <div className="rounded-2xl bg-teal-700 text-white p-8 md:p-10 flex flex-col shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-6">
+              <Users size={22} />
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-teal-200 mb-2">For Recruiters</span>
+            <h3 className="text-3xl font-bold mb-3">Hire Talent</h3>
+            <p className="text-teal-100 text-sm leading-relaxed mb-7">
+              Post a job, not a job-description novel. Describe what you need and
+              let AI handle the scoping, matching, and quality control.
             </p>
-            <Link href="/login?mode=signup&role=recruiter" className="btn-primary inline-flex items-center gap-2 mt-2">
-              Post your first job <ArrowRight size={14} />
+            <ul className="space-y-3 mb-8 flex-1">
+              {recruiterPoints.map((point) => (
+                <li key={point} className="flex items-start gap-2.5 text-sm text-teal-50">
+                  <CheckCircle2 size={16} className="text-teal-200 shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/login?mode=signup&role=recruiter"
+              className="bg-white text-teal-700 font-semibold px-6 py-3.5 rounded-lg hover:bg-teal-50 transition-colors inline-flex items-center justify-center gap-2 text-base">
+              Post a Job <ArrowRight size={16} />
             </Link>
           </div>
-          <div className="card space-y-3">
-            <span className="badge-orange">For Freelancers</span>
-            <h3 className="text-lg font-bold text-gray-900">Get matched to real, funded work</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Every job you're matched to is already funded in escrow. Submit your
-              work, get AI feedback before the client ever sees a rough draft, and
-              get paid the moment it passes — straight to Paystack or Flutterwave.
+
+          {/* Find Work — orange */}
+          <div className="rounded-2xl bg-orange-600 text-white p-8 md:p-10 flex flex-col shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-6">
+              <FileCheck size={22} />
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-orange-100 mb-2">For Freelancers</span>
+            <h3 className="text-3xl font-bold mb-3">Find Work</h3>
+            <p className="text-orange-50 text-sm leading-relaxed mb-7">
+              Get matched to real, funded work — no chasing invoices, no
+              scope creep, no wondering if a client will actually pay.
             </p>
-            <Link href="/login?mode=signup&role=freelancer" className="btn-outline inline-flex items-center gap-2 mt-2">
-              Create your profile <ArrowRight size={14} />
+            <ul className="space-y-3 mb-8 flex-1">
+              {freelancerPoints.map((point) => (
+                <li key={point} className="flex items-start gap-2.5 text-sm text-orange-50">
+                  <CheckCircle2 size={16} className="text-orange-100 shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+            <Link href="/login?mode=signup&role=freelancer"
+              className="bg-white text-orange-600 font-semibold px-6 py-3.5 rounded-lg hover:bg-orange-50 transition-colors inline-flex items-center justify-center gap-2 text-base">
+              Find Work <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -121,14 +167,18 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-surface-border bg-white">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <LogoMark size={22} />
             <span className="text-sm font-semibold">
               <span className="text-teal-700">Gig</span>
               <span className="text-orange-600">Huz</span>
             </span>
+          </Link>
+          <div className="flex items-center gap-4 text-xs text-gray-400">
+            <Link href="/terms" className="hover:text-gray-600 transition-colors">Terms of Use</Link>
+            <Link href="/privacy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
+            <span>© {new Date().getFullYear()} GigHuz. All rights reserved.</span>
           </div>
-          <p className="text-xs text-gray-400">© {new Date().getFullYear()} GigHuz. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -39,7 +39,7 @@ export function Sidebar({ role = 'recruiter' }: { role?: 'recruiter' | 'freelanc
     <aside className="fixed left-0 top-0 h-screen w-56 bg-white border-r border-surface-border flex flex-col z-20 shadow-sm">
       {/* Logo */}
       <div className="px-4 py-4 border-b border-surface-border">
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <LogoMark size={32} />
           <div>
             <div className="font-bold text-lg leading-none">
@@ -50,7 +50,7 @@ export function Sidebar({ role = 'recruiter' }: { role?: 'recruiter' | 'freelanc
               {role === 'recruiter' ? 'Recruiter Portal' : 'Talent Gateway'}
             </p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Main nav */}

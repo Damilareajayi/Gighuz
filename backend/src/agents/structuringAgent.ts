@@ -7,8 +7,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const PROMPT = (input: StructuringAgentInput) => `
 You are GigHuz's Structuring Agent. Your job is to parse a raw job description
-posted by an international client and convert it into a structured set of
-deliverable milestones that an African freelancer can execute clearly.
+posted by a client and convert it into a structured set of deliverable
+milestones that a freelancer can execute clearly.
 
 Raw Description:
 ${input.descriptionRaw}

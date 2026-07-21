@@ -26,7 +26,7 @@ const agents = [
   {
     id: 'matching',
     name: 'Matching Agent',
-    description: 'Semantically matches structured jobs to vetted African talent using expertise cluster scoring.',
+    description: 'Semantically matches structured jobs to vetted talent using expertise cluster scoring.',
     status: 'active',
     tasksToday: 2,
     successRate: 100,

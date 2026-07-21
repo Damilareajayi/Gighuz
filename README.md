@@ -1,6 +1,6 @@
-# GigHuz Africa
+# GigHuz
 
-AI-orchestrated freelance marketplace connecting African freelancers with international clients. Four Gemini-powered agents handle job structuring, talent matching, deliverable auditing, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route local payouts.
+AI-orchestrated global freelance marketplace connecting clients and freelance talent, anywhere in the world. Four Gemini-powered agents handle job structuring, talent matching, deliverable auditing, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route payouts.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together.
 

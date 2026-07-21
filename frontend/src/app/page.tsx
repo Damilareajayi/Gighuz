@@ -11,7 +11,7 @@ const steps = [
   {
     icon: Zap,
     title: 'Get matched',
-    description: 'The Matching Agent ranks vetted African freelancers by skill fit, rating, and track record — instantly.',
+    description: 'The Matching Agent ranks vetted freelancers by skill fit, rating, and track record — instantly.',
   },
   {
     icon: ShieldCheck,
@@ -48,7 +48,7 @@ export default function LandingPage() {
           The borderless engine <br className="hidden md:block" /> for global work
         </h1>
         <p className="mt-5 text-base md:text-lg text-gray-500 max-w-2xl mx-auto">
-          GigHuz connects international clients with vetted African freelance talent.
+          GigHuz connects clients with vetted freelance talent anywhere in the world.
           Four AI agents structure every job, match the right person, audit every
           deliverable, and release payment automatically — so quality is guaranteed
           on both sides.

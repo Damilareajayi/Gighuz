@@ -79,7 +79,7 @@ async function flwPost(path: string, body: object): Promise<Record<string, any>>
 }
 
 /**
- * Initiate payout via Flutterwave (supports 30+ African countries,
+ * Initiate payout via Flutterwave (supports 30+ countries,
  * bank transfer, mobile money, M-Pesa).
  */
 export async function flutterwavePayout(
@@ -141,7 +141,7 @@ export async function routePayout(
     );
   }
 
-  // All other African countries → Flutterwave
+  // Everywhere else → Flutterwave
   if (
     freelancerData.bankCode &&
     freelancerData.accountNumber &&

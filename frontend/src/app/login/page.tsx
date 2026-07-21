@@ -24,7 +24,7 @@ export default function LoginPage() {
   // Phone auth
   const [showPhone, setShowPhone] = useState(false);
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter-number');
-  const [dialCode, setDialCode] = useState('+234');
+  const [dialCode, setDialCode] = useState('+1');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [code, setCode] = useState('');
   const confirmationRef = useRef<ConfirmationResult | null>(null);
@@ -32,7 +32,7 @@ export default function LoginPage() {
 
   const [role, setRole] = useState<Role>(searchParams.get('role') === 'recruiter' ? 'recruiter' : 'freelancer');
   const [name, setName] = useState('');
-  const [country, setCountry] = useState('NG');
+  const [country, setCountry] = useState('US');
   const [bio, setBio] = useState('');
   const [skills, setSkills] = useState('');
   const [company, setCompany] = useState('');

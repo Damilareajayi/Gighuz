@@ -7,8 +7,8 @@ import { AuthProvider } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'GigHuz Africa — The Borderless Engine for Global Work',
-  description: 'AI-orchestrated freelance marketplace connecting global clients with vetted African talent.',
+  title: 'GigHuz — The Borderless Engine for Global Work',
+  description: 'AI-orchestrated freelance marketplace connecting clients and vetted freelance talent, anywhere in the world.',
   icons: {
     icon: [
       { url: '/brand/favicon.svg',       type: 'image/svg+xml' },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     apple: '/brand/gighuz-icon-192.png',
   },
   openGraph: {
-    title: 'GigHuz Africa',
+    title: 'GigHuz',
     description: 'The borderless engine for global work.',
     images: [{ url: '/brand/gighuz-og.png', width: 1200, height: 630 }],
   },

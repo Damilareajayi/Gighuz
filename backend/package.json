@@ -1,7 +1,7 @@
 {
   "name": "gighuz-backend",
   "version": "1.0.0",
-  "description": "GigHuz Africa — AI-Orchestrated Freelance Marketplace Backend",
+  "description": "GigHuz — AI-Orchestrated Freelance Marketplace Backend",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #C8DDE4; border-radius: 2px; }
+}
+
+@layer components {
+  /* Cards */
+  .card { @apply bg-white border border-surface-border rounded-xl p-5 shadow-sm; }
+  .card-hover { @apply card hover:border-teal-700/30 hover:shadow-md transition-all duration-200; }
+
+  /* Badges */
+  .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
+  .badge-teal   { @apply badge bg-teal-100 text-teal-700; }
+  .badge-orange { @apply badge bg-orange-100 text-orange-600; }
+  .badge-gray   { @apply badge bg-gray-100 text-gray-600; }
+  .badge-green  { @apply badge bg-green-50 text-green-700; }
+  .badge-red    { @apply badge bg-red-50 text-red-600; }
+
+  /* Buttons */
+  .btn-primary  { @apply bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-lg hover:bg-teal-800 transition-colors text-sm disabled:opacity-40; }
+  .btn-orange   { @apply bg-orange-600 text-white font-semibold px-4 py-2.5 rounded-lg hover:bg-orange-700 transition-colors text-sm disabled:opacity-40; }
+  .btn-outline  { @apply border border-surface-border text-gray-600 font-medium px-4 py-2.5 rounded-lg hover:bg-surface-alt transition-colors text-sm; }
+  .btn-ghost    { @apply text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-3 py-2 rounded-lg transition-colors text-sm; }
+
+  /* Nav */
+  .nav-link     { @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors cursor-pointer; }
+  .nav-link.active { @apply text-teal-700 bg-teal-50; }
+
+  /* Split brand text */
+  .brand-gig { @apply text-teal-700 font-bold; }
+  .brand-huz { @apply text-orange-600 font-bold; }
+
+  /* Section label */
+  .section-label { @apply text-xs font-semibold text-gray-400 uppercase tracking-widest; }
+
+  /* Status chips */
+  .status-pending    { @apply badge-gray; }
+  .status-matched    { @apply badge-teal; }
+  .status-progress   { @apply badge bg-blue-50 text-blue-700; }
+  .status-auditing   { @apply badge bg-yellow-50 text-yellow-700; }
+  .status-approved   { @apply badge-green; }
+  .status-paid       { @apply badge bg-emerald-50 text-emerald-700; }
+  .status-flagged    { @apply badge-red; }
+}

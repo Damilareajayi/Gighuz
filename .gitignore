@@ -1,0 +1,16 @@
+.claude/
+node_modules/
+dist/
+.next/
+.tools/
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+emulator-data/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+.DS_Store

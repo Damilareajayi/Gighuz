@@ -2,13 +2,15 @@
 
 AI-orchestrated global freelance marketplace connecting clients and freelance talent, anywhere in the world. Four Gemini-powered agents handle job structuring, talent matching, deliverable auditing, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route payouts.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together,
+and [MOBILE.md](./MOBILE.md) for the iOS/Android app (a Capacitor shell
+around this same frontend).
 
 ## Structure
 
 ```
 backend/    Express + TypeScript API, Firebase Admin, Gemini agents, Stripe/Paystack/Flutterwave
-frontend/   Next.js 14 (App Router) dashboard for recruiters and freelancers
+frontend/   Next.js 14 (App Router) dashboard for recruiters and freelancers, + Capacitor mobile shell
 firebase.json, .firebaserc, firestore.rules   Local emulator config
 ```
 

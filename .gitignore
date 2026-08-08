@@ -14,3 +14,16 @@ emulator-data/
 .env.*.local
 npm-debug.log*
 .DS_Store
+
+# Capacitor native build output (project files are committed, build artifacts aren't)
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/app/build/
+frontend/android/build/
+frontend/android/captures/
+frontend/android/.idea/
+frontend/ios/App/Pods/
+frontend/ios/App/build/
+frontend/ios/App/App.xcodeproj/xcuserdata/
+frontend/ios/App/App.xcodeproj/project.xcworkspace/xcuserdata/
+frontend/ios/.build/

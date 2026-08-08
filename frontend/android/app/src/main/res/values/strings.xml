@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GigHuz</string>
+    <string name="title_activity_main">GigHuz</string>
+    <string name="package_name">com.gighuz.app</string>
+    <string name="custom_url_scheme">com.gighuz.app</string>
+</resources>

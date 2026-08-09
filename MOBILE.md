@@ -76,10 +76,14 @@ work, not a config tweak.
 
 ## Before shipping to an app store
 
-- Point `CAPACITOR_SERVER_URL` at a real deployed HTTPS URL — an app
+- [x] App icon/splash screen — generated from `public/brand/gighuz-icon-512.png`
+  via `@capacitor/assets` (source images kept at `frontend/resources/` for
+  regenerating later with a higher-res source if you get one).
+- [ ] Point `CAPACITOR_SERVER_URL` at a real deployed HTTPS URL — an app
   pointed at `10.0.2.2` or your laptop's LAN IP only works on your network.
-- Replace the default Capacitor app icon/splash screen (currently unset —
-  `npx cap sync` uses Capacitor's placeholder assets, not GigHuz branding).
-- Fix Google Sign-In per above.
-- Review Apple/Google developer account requirements — separate from
+  See `DEPLOY.md`.
+- [ ] Fix Google Sign-In per above. Now unblocked once you have a real
+  Firebase project (needed for the native plugin's `google-services.json` /
+  `GoogleService-Info.plist`) — not yet done.
+- [ ] Review Apple/Google developer account requirements — separate from
   anything in this repo.

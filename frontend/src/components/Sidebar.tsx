@@ -32,7 +32,7 @@ const agentNav = [
 type SidebarRole = 'recruiter' | 'freelancer' | 'agent_developer';
 
 const portalLabel: Record<SidebarRole, string> = {
-  recruiter: 'Recruiter Portal',
+  recruiter: 'Client Portal',
   freelancer: 'Talent Gateway',
   agent_developer: 'Developer Console',
 };

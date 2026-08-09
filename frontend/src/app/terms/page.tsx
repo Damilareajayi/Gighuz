@@ -16,7 +16,7 @@ export default function TermsPage() {
           Platform.
         </p>
         <p>
-          GigHuz connects three kinds of Users: <strong>Recruiters</strong> (also referred
+          GigHuz connects three kinds of Users: <strong>Clients</strong> (also referred
           to as clients — individuals or organizations who post jobs and hire talent),{' '}
           <strong>Freelancers</strong> (individuals who offer services and complete work
           themselves), and <strong>Agent Developers</strong> (individuals or organizations
@@ -40,7 +40,7 @@ export default function TermsPage() {
 
       <LegalSection title="3. What GigHuz Is — and Isn't">
         <p>
-          GigHuz is an AI-orchestrated marketplace that helps Recruiters describe work,
+          GigHuz is an AI-orchestrated marketplace that helps Clients describe work,
           get matched with Workers — human Freelancers or third-party AI agents — and pay
           for completed deliverables. Several platform functions — job structuring,
           candidate and agent matching, deliverable auditing, resume generation, and
@@ -49,7 +49,7 @@ export default function TermsPage() {
         </p>
         <p>
           <strong>GigHuz's role on every job is limited to two things: (1) matching and
-          linking a Recruiter to a Worker — a Freelancer or a third-party AI agent — able
+          linking a Client to a Worker — a Freelancer or a third-party AI agent — able
           to perform the described task, and (2) auditing the work that Worker submits
           against the job's stated acceptance criteria.</strong> GigHuz does not perform
           the work itself, does not supervise or direct how a Freelancer or an AI agent
@@ -58,9 +58,9 @@ export default function TermsPage() {
         </p>
         <p>
           <strong>GigHuz is a marketplace and payment facilitator, not an employer,
-          staffing agency, or party to the working relationship between a Recruiter and a
+          staffing agency, or party to the working relationship between a Client and a
           Worker.</strong> Freelancers are independent contractors, not employees, agents,
-          or partners of GigHuz or of the Recruiters they work with. Third-party AI agents
+          or partners of GigHuz or of the Clients they work with. Third-party AI agents
           listed by Agent Developers are tools operated and controlled by their respective
           Agent Developer, not by GigHuz. GigHuz does not direct or control the manner in
           which Freelancers perform work or in which AI agents generate output.
@@ -73,7 +73,7 @@ export default function TermsPage() {
           agents:
         </p>
         <ul className="list-disc pl-5 space-y-1.5">
-          <li><strong>Structuring Agent</strong> — converts a Recruiter's raw job description into milestones, a budget range, and required skills.</li>
+          <li><strong>Structuring Agent</strong> — converts a Client's raw job description into milestones, a budget range, and required skills.</li>
           <li><strong>Matching Agent</strong> — ranks Freelancer profiles and AI agent listings against a job's requirements.</li>
           <li><strong>Deliverable Auditor</strong> — reviews a Worker's submission against a milestone's stated acceptance criteria and returns a pass/flag result with feedback. This is the extent of GigHuz's review of any deliverable — see Section 3.</li>
           <li><strong>Comms Agent</strong> — generates status messages sent to Users (e.g. over WhatsApp).</li>
@@ -100,7 +100,7 @@ export default function TermsPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="5. Recruiter Responsibilities">
+      <LegalSection title="5. Client Responsibilities">
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Post job descriptions that are accurate, lawful, and sufficiently detailed for milestones to be structured meaningfully.</li>
           <li>Fund milestone escrow before expecting a Worker to begin or continue work on that milestone.</li>
@@ -114,7 +114,7 @@ export default function TermsPage() {
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Provide accurate information about your skills, experience, and availability.</li>
           <li>Deliver work that reflects your own effort and that you have the right to provide (see Section 11 on intellectual property).</li>
-          <li>Submit deliverables against the milestone's stated acceptance criteria, with enough detail (files, notes, links) for the Deliverable Auditor and the Recruiter to evaluate the work fairly.</li>
+          <li>Submit deliverables against the milestone's stated acceptance criteria, with enough detail (files, notes, links) for the Deliverable Auditor and the Client to evaluate the work fairly.</li>
           <li>Keep your payout details (bank account, mobile money, or payment-provider recipient information) accurate and up to date so payouts aren't delayed or misdirected.</li>
           <li>Not attempt to circumvent the Platform to receive payment for GigHuz-sourced work outside of GigHuz's escrow and payout system.</li>
         </ul>
@@ -135,13 +135,13 @@ export default function TermsPage() {
         <p>
           <strong>Users are responsible for the output of work performed on the
           Platform</strong> — whether that work is performed by a human Freelancer or by a
-          third-party AI agent listed by an Agent Developer. A Recruiter who accepts, uses,
+          third-party AI agent listed by an Agent Developer. A Client who accepts, uses,
           publishes, or otherwise relies on a deliverable does so at their own discretion
           and risk; a Freelancer or Agent Developer whose Worker produces that deliverable
           remains responsible for it being their own, lawful, and as-described.
         </p>
         <p>
-          As set out in Section 3, GigHuz's role is limited to matching Recruiters with
+          As set out in Section 3, GigHuz's role is limited to matching Clients with
           Workers and auditing submitted deliverables against stated acceptance criteria.
           GigHuz does not create, supervise, edit, or guarantee any deliverable, and a
           passing audit result reflects only that the Deliverable Auditor's automated
@@ -162,7 +162,7 @@ export default function TermsPage() {
 
       <LegalSection title="9. Ratings and Feedback">
         <p>
-          Once a milestone reaches "paid" status, the Recruiter who funded it may submit a
+          Once a milestone reaches "paid" status, the Client who funded it may submit a
           1–5 star rating and optional written feedback for the Worker who completed it.
           Each milestone may be rated once. Ratings are attached to the Freelancer's
           profile or the AI agent's Agent Catalog listing (not to the Agent Developer
@@ -181,20 +181,20 @@ export default function TermsPage() {
 
       <LegalSection title="10. Payments, Escrow, and Fees">
         <ul className="list-disc pl-5 space-y-1.5">
-          <li><strong>Escrow.</strong> When a Recruiter funds a milestone, payment is authorized and held via our payment processor (currently Stripe) but not released to the Worker until the milestone is approved.</li>
-          <li><strong>Release.</strong> Funds are released when the Deliverable Auditor returns a "pass" result, or when a Recruiter and Worker otherwise agree a milestone is complete. A "flag" result keeps funds in escrow pending revision or dispute resolution.</li>
+          <li><strong>Escrow.</strong> When a Client funds a milestone, payment is authorized and held via our payment processor (currently Stripe) but not released to the Worker until the milestone is approved.</li>
+          <li><strong>Release.</strong> Funds are released when the Deliverable Auditor returns a "pass" result, or when a Client and Worker otherwise agree a milestone is complete. A "flag" result keeps funds in escrow pending revision or dispute resolution.</li>
           <li><strong>Payout.</strong> Approved funds are paid out to Freelancers and Agent Developers through a regional payment provider (currently Paystack or Flutterwave, selected automatically based on the payee's country and available payout method), minus GigHuz's platform fee.</li>
           <li><strong>Platform fee.</strong> GigHuz deducts a platform fee — currently 18% — from the payout on each released milestone, whether performed by a Freelancer or a listed AI agent. Agent listings themselves are free to register; this usage fee is the only amount GigHuz charges Agent Developers. The fee percentage may change with notice as described in Section 16.</li>
           <li><strong>Currency and third-party fees.</strong> Amounts may be subject to currency conversion and to fees charged by our payment processors, which are outside GigHuz's control.</li>
-          <li><strong>Refunds and cancellations.</strong> If a job or milestone is cancelled before work begins or before a submission is made, escrowed funds may be refunded to the Recruiter, less any fees already incurred and non-refundable to GigHuz by its payment processors.</li>
+          <li><strong>Refunds and cancellations.</strong> If a job or milestone is cancelled before work begins or before a submission is made, escrowed funds may be refunded to the Client, less any fees already incurred and non-refundable to GigHuz by its payment processors.</li>
         </ul>
       </LegalSection>
 
       <LegalSection title="11. Intellectual Property">
         <p>
-          As between a Recruiter and a Worker, and unless the parties agree otherwise
+          As between a Client and a Worker, and unless the parties agree otherwise
           outside the Platform, ownership of a specific deliverable transfers to the
-          Recruiter upon full payment for the milestone it was submitted under.
+          Client upon full payment for the milestone it was submitted under.
           Freelancers and Agent Developers represent that submitted work — including
           AI-agent-generated output — is either their own original creation or work they
           have the right to deliver, and that it does not infringe any third party's
@@ -209,7 +209,7 @@ export default function TermsPage() {
 
       <LegalSection title="12. Disputes Between Users">
         <p>
-          If a Recruiter and a Worker disagree about whether a milestone was completed
+          If a Client and a Worker disagree about whether a milestone was completed
           satisfactorily, either party may flag the milestone for review. GigHuz may (but
           is not obligated to) review the submission, the acceptance criteria, and any AI
           audit result, and make a determination about releasing or returning escrowed

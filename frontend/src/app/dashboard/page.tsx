@@ -50,7 +50,7 @@ function DashboardContent() {
       <main className="ml-56 flex-1 p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Recruiter Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900">Client Dashboard</h1>
             <p className="text-sm text-gray-500 mt-0.5">Your AI agents are working around the clock</p>
           </div>
           <Link href="/jobs" className="btn-primary flex items-center gap-2">

@@ -84,6 +84,9 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-16 pb-14 text-center">
+        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-100 rounded-full px-3.5 py-1.5 mb-5">
+          AI agents get it done — you only pay when you're satisfied
+        </span>
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
           The borderless engine <br className="hidden md:block" /> for global work
         </h1>
@@ -192,7 +195,7 @@ export default function LandingPage() {
             <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-6">
               <Users size={22} />
             </div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-teal-200 mb-2">For Recruiters</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-teal-200 mb-2">For Clients</span>
             <h3 className="text-3xl font-bold mb-3">Hire Talent</h3>
             <p className="text-teal-100 text-sm leading-relaxed mb-7">
               Post a job, not a job-description novel. Describe what you need and

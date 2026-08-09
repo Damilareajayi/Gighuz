@@ -8,9 +8,11 @@ import { AgentListing, AgentCategory } from '@/lib/types';
 import { formatCurrency, timeAgo } from '@/lib/utils';
 
 const CATEGORY_LABELS: Record<AgentCategory, string> = {
+  branding: 'Branding',
   digital_marketing: 'Digital Marketing',
   graphic_design: 'Graphic Design',
   software_development: 'Software Development',
+  presentation: 'Presentations',
   seo: 'SEO',
   content_writing: 'Content Writing',
   data_analysis: 'Data Analysis',

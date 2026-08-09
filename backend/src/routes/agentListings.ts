@@ -8,8 +8,8 @@ import { AgentListing } from '../types';
 const router = Router();
 
 const CATEGORIES = [
-  'digital_marketing', 'graphic_design', 'software_development', 'seo',
-  'content_writing', 'data_analysis', 'customer_support', 'other',
+  'branding', 'digital_marketing', 'graphic_design', 'software_development',
+  'presentation', 'seo', 'content_writing', 'data_analysis', 'customer_support', 'other',
 ] as const;
 
 const AgentListingSchema = z.object({

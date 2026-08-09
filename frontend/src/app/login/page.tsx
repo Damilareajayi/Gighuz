@@ -158,7 +158,7 @@ export default function LoginPage() {
           <div className="flex gap-2">
             {([
               { value: 'freelancer', label: 'Freelancer' },
-              { value: 'recruiter', label: 'Recruiter' },
+              { value: 'recruiter', label: 'Client' },
               { value: 'agent_developer', label: 'Agent Developer' },
             ] as { value: Role; label: string }[]).map(r => (
               <button key={r.value} onClick={() => setRole(r.value)}

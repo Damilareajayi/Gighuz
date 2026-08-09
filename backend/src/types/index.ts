@@ -58,9 +58,11 @@ export interface Freelancer {
 // either way — the auditor doesn't care who/what produced the submission.
 
 export type AgentCategory =
+  | 'branding'
   | 'digital_marketing'
   | 'graphic_design'
   | 'software_development'
+  | 'presentation'
   | 'seo'
   | 'content_writing'
   | 'data_analysis'

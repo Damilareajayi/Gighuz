@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
 const usingEmulator = Boolean(process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST);
+const hasExplicitCredentials = Boolean(process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY);
 
 export function initFirebase() {
   if (getApps().length === 0) {
@@ -10,7 +11,7 @@ export function initFirebase() {
       // Emulators don't check credentials — just need a project id to match the client.
       initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID || 'demo-gighuz' });
       console.log('[Firebase] Connected to local emulators');
-    } else {
+    } else if (hasExplicitCredentials) {
       initializeApp({
         credential: cert({
           projectId: process.env.FIREBASE_PROJECT_ID,
@@ -18,6 +19,14 @@ export function initFirebase() {
           privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         }),
       });
+    } else {
+      // No service-account key configured — fall back to Application Default
+      // Credentials. On Cloud Run (and any GCP compute product), the ADK
+      // auto-loads the runtime service account's identity from the metadata
+      // server, so no key file needs to exist anywhere. The runtime service
+      // account still needs Firestore/Auth/Storage IAM roles granted.
+      initializeApp({ projectId: process.env.FIREBASE_PROJECT_ID });
+      console.log('[Firebase] Using Application Default Credentials');
     }
 
     // Several of our types have fields that are only set for one worker type

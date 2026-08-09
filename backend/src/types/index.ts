@@ -43,6 +43,7 @@ export interface Freelancer {
   resumeText?: string;                  // AI-generated resume content
   resumeSource?: ResumeSource;
   resumeUpdatedAt?: string;
+  skillVerification?: SkillVerificationResult;
   // Payout routing details
   paystackRecipientCode?: string;
   bankCode?: string;
@@ -117,6 +118,40 @@ export interface MilestoneInstance {
   paidAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type ChangeRequestVerdict = 'in_scope' | 'out_of_scope' | 'pending';
+
+export interface ChangeRequest {
+  id: string;
+  milestoneId: string;
+  jobId: string;
+  recruiterId: string;
+  freelancerId: string;
+  description: string;
+  verdict: ChangeRequestVerdict;
+  reasoning?: string;
+  suggestedAdditionalAmountUsd?: number;
+  createdAt: string;
+}
+
+export interface CaseStudy {
+  id: string;
+  freelancerId: string;
+  jobId: string;
+  milestoneId: string;
+  jobTitle: string;
+  summary: string;
+  skillsUsed: string[];
+  outcomeHighlight: string;
+  createdAt: string;
+}
+
+export interface SkillVerificationResult {
+  score: number;                          // 0–100 confidence that portfolio evidence backs claimed skills
+  notes: string;
+  verifiedLinks: Array<{ url: string; supportsSkills: string[]; unreachable?: boolean }>;
+  verifiedAt: string;
 }
 
 export type AuditResult = 'pending' | 'pass' | 'flag';
@@ -206,6 +241,37 @@ export interface CommsAgentOutput {
   message: string;
   channel: 'whatsapp' | 'email';
   sent: boolean;
+}
+
+export interface ScopeGuardAgentInput {
+  milestone: MilestoneInstance;
+  requestDescription: string;
+}
+
+export interface ScopeGuardAgentOutput {
+  verdict: 'in_scope' | 'out_of_scope';
+  reasoning: string;
+  suggestedAdditionalAmountUsd?: number;
+}
+
+export interface SkillVerificationAgentInput {
+  skills: string[];
+  portfolioLinks: string[];
+}
+
+export interface CaseStudyAgentInput {
+  jobTitle: string;
+  milestoneName: string;
+  deliverableDescription: string;
+  acceptanceCriteria: string[];
+  submissionNotes: string;
+  skillsUsed: string[];
+  auditFeedback: string;
+}
+
+export interface CaseStudyAgentOutput {
+  summary: string;
+  outcomeHighlight: string;
 }
 
 // ─── Payment Types ────────────────────────────────────────────────────────────

@@ -1,6 +1,31 @@
 import Link from 'next/link';
-import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight, CheckCircle2, Users, FileCheck } from 'lucide-react';
+import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight, CheckCircle2, Users, FileCheck, ShieldAlert, BadgeCheck, Sparkles, X, Check } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
+
+const comparisonRows = [
+  { theirs: 'Trust built on reviews — lagging, gameable, useless for your first hire', ours: 'Trust enforced up front: AI audits every deliverable before you ever see it' },
+  { theirs: 'Scope creep is an argument you have to win yourself', ours: 'Scope Guard Agent rules on every change request — free revision or new paid work, decided instantly' },
+  { theirs: 'Skills are just self-reported tags', ours: 'Skill Verification Agent checks portfolio evidence against every claimed skill' },
+  { theirs: 'Your portfolio is whatever you remember to update', ours: 'Case Study Agent writes your portfolio for you, automatically, every time you get paid' },
+];
+
+const beyondFeatures = [
+  {
+    icon: ShieldAlert,
+    title: 'Scope Guard Agent',
+    description: 'When a client asks for "just one small change," this agent rules whether it\'s covered by the original milestone or deserves its own payment — before you do the work for free.',
+  },
+  {
+    icon: BadgeCheck,
+    title: 'Skill Verification Agent',
+    description: 'Portfolio links get checked against claimed skills automatically, so "React expert" means something more than a tag someone typed in.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Case Study Agent',
+    description: 'Every paid, audit-passed milestone becomes a polished case study on your profile automatically — your portfolio builds itself as you work.',
+  },
+];
 
 const recruiterPoints = [
   'AI structures your job post into clear, priced milestones in seconds',
@@ -80,6 +105,34 @@ export default function LandingPage() {
         </p>
       </section>
 
+      {/* Why GigHuz — trust enforced, not crowdsourced */}
+      <section className="max-w-5xl mx-auto px-6 py-14">
+        <div className="text-center mb-10">
+          <p className="section-label mb-2">Why GigHuz</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Trust, enforced — not crowdsourced
+          </h2>
+          <p className="text-sm text-gray-500 mt-3 max-w-xl mx-auto">
+            Review-based marketplaces tell you who was good last time. GigHuz checks
+            whether the work in front of you is good right now.
+          </p>
+        </div>
+        <div className="card divide-y divide-surface-border">
+          {comparisonRows.map((row) => (
+            <div key={row.ours} className="grid md:grid-cols-2 gap-3 py-4 first:pt-0 last:pb-0">
+              <div className="flex items-start gap-2.5 text-sm text-gray-400">
+                <X size={15} className="shrink-0 mt-0.5" />
+                <span>{row.theirs}</span>
+              </div>
+              <div className="flex items-start gap-2.5 text-sm text-gray-800 font-medium">
+                <Check size={15} className="text-teal-600 shrink-0 mt-0.5" />
+                <span>{row.ours}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* How it works */}
       <section className="max-w-5xl mx-auto px-6 py-14">
         <p className="section-label text-center mb-2">How it works</p>
@@ -94,6 +147,27 @@ export default function LandingPage() {
                   <Icon size={16} className="text-teal-700" />
                 </div>
                 <span className="text-xs font-semibold text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1.5">{title}</h3>
+              <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Beyond matching — the protections other platforms don't have */}
+      <section className="max-w-5xl mx-auto px-6 py-14">
+        <div className="text-center mb-10">
+          <p className="section-label mb-2">Beyond matching</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Three more agents, still nobody else has them
+          </h2>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {beyondFeatures.map(({ icon: Icon, title, description }) => (
+            <div key={title} className="card">
+              <div className="p-2 rounded-lg bg-orange-50 w-fit mb-3">
+                <Icon size={16} className="text-orange-600" />
               </div>
               <h3 className="text-sm font-bold text-gray-900 mb-1.5">{title}</h3>
               <p className="text-xs text-gray-500 leading-relaxed">{description}</p>

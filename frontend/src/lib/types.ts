@@ -27,6 +27,25 @@ export interface Job {
 
 export type ResumeSource = 'uploaded' | 'ai_generated';
 
+export interface SkillVerificationResult {
+  score: number;
+  notes: string;
+  verifiedLinks: Array<{ url: string; supportsSkills: string[]; unreachable?: boolean }>;
+  verifiedAt: string;
+}
+
+export interface CaseStudy {
+  id: string;
+  freelancerId: string;
+  jobId: string;
+  milestoneId: string;
+  jobTitle: string;
+  summary: string;
+  skillsUsed: string[];
+  outcomeHighlight: string;
+  createdAt: string;
+}
+
 export interface Freelancer {
   id: string;
   uid: string;
@@ -51,6 +70,7 @@ export interface Freelancer {
   resumeText?: string;
   resumeSource?: ResumeSource;
   resumeUpdatedAt?: string;
+  skillVerification?: SkillVerificationResult;
 }
 
 export interface Recruiter {
@@ -87,6 +107,19 @@ export interface MilestoneInstance {
   paidAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ChangeRequest {
+  id: string;
+  milestoneId: string;
+  jobId: string;
+  recruiterId: string;
+  freelancerId: string;
+  description: string;
+  verdict: 'in_scope' | 'out_of_scope' | 'pending';
+  reasoning?: string;
+  suggestedAdditionalAmountUsd?: number;
+  createdAt: string;
 }
 
 export interface Submission {

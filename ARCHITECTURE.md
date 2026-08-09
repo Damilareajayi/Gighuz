@@ -18,10 +18,9 @@
               ▼                      ▼                      ▼
      ┌────────────────┐   ┌──────────────────┐   ┌────────────────────┐
      │ Firebase Auth   │   │ Firestore         │   │ Gemini AI Agents   │
-     │ (identity)      │   │ (jobs, profiles,  │   │ structuring/       │
-     │                 │   │  milestones, subs)│   │ matching/auditor/  │
-     └────────────────┘   └──────────────────┘   │ comms/resume       │
-                                     │              └──────────┬─────────┘
+     │ (identity)      │   │ (jobs, profiles,  │   │ 8 agents — see     │
+     │                 │   │  milestones, subs)│   │ Backend section    │
+     └────────────────┘   └──────────────────┘   └──────────┬─────────┘
                                      │                          │
                                      ▼                          ▼
                          ┌─────────────────────────┐  ┌──────────────────┐
@@ -33,7 +32,17 @@
                          └─────────────────────────┘
 ```
 
-Recruiters post jobs; the Structuring Agent turns raw text into priced milestones. Recruiters trigger matching; the Matching Agent ranks freelancers and the Comms Agent notifies them. Freelancers submit work; the Deliverable Auditor checks it against acceptance criteria and, on a pass, captures the Stripe escrow and routes a payout automatically.
+Recruiters post jobs; the Structuring Agent turns raw text into priced milestones. Recruiters trigger matching; the Matching Agent ranks freelancers and the Comms Agent notifies them. Freelancers submit work; the Deliverable Auditor checks it against acceptance criteria and, on a pass, captures the Stripe escrow, routes a payout automatically, and generates a case study for the freelancer's profile. Mid-milestone, either party can trigger the Scope Guard Agent to rule on a change request before free work happens by accident. Freelancers can trigger skill verification against their own portfolio links at any time.
+
+### Why the extra three agents exist
+
+The first five agents (structuring, matching, auditor, comms, resume) get GigHuz to feature parity with an AI-assisted version of Upwork/Fiverr. They don't make it defensible — a competitor can build "AI matches you to jobs" in a quarter. The differentiator is that **trust is enforced up front instead of crowdsourced after the fact**: reviews tell you who was good last time, GigHuz's audit gate tells you whether the work in front of you is good right now, before money moves.
+
+- **Scope Guard Agent** attacks unpaid scope creep — one of the most common freelance complaints on every existing platform — by giving an instant, consistent ruling instead of leaving it to an argument the freelancer usually loses.
+- **Skill Verification Agent** replaces self-reported skill tags (Upwork/Fiverr's status quo) with an actual check against portfolio evidence.
+- **Case Study Agent** compounds a freelancer's reason to stay on-platform: their portfolio builds itself for free every time they get paid, which no competitor does.
+
+None of this requires the client or freelancer to do anything differently — it's automatic, which is the point.
 
 ## Backend (`backend/src`)
 
@@ -45,9 +54,11 @@ middleware/auth.ts     requireAuth(roles?) — verifies Firebase ID token, looks
 routes/
   jobs.ts               POST/GET /jobs, /:id/structure, /:id/match, /:id/assign
   profiles.ts            onboarding, /me, /me/avatar, /me/resume(/generate),
+                        /me/verify-skills, /me/case-studies,
                         /freelancers (recruiter talent search)
   submissions.ts         freelancer work submission → triggers the auditor
-  payments.ts             milestone escrow funding, manual payout trigger
+  payments.ts             milestone escrow funding, manual payout trigger,
+                        /:id/change-requests (Scope Guard)
   webhooks.ts             Stripe + Flutterwave webhook receivers
 agents/
   structuringAgent.ts     raw description → title, milestones, budget, skills
@@ -55,6 +66,9 @@ agents/
   deliverableAuditor.ts   submission → pass/flag, capture escrow + payout on pass
   commsAgent.ts           event → WhatsApp message (via Gemini + Twilio)
   resumeAgent.ts          freelancer profile → generated resume text
+  scopeGuardAgent.ts      change request vs. original milestone → in/out of scope
+  skillVerificationAgent.ts  fetches portfolio links, checks evidence vs. claimed skills
+  caseStudyAgent.ts       completed + paid milestone → auto-written portfolio entry
 services/
   firebase.ts             Admin SDK init (real credentials or local emulators)
   stripe.ts                escrow create/capture/cancel
@@ -85,6 +99,9 @@ Gemini calls are wrapped in `try/catch`. If the call fails or returns unparseabl
 - Auditor → flags the submission for manual review
 - Comms → a canned message per event type
 - Resume → a template built directly from profile fields
+- Scope Guard → defaults to `out_of_scope`, so an outage never pressures a freelancer into unpaid work
+- Skill Verification → falls back to a link-reachability-only score with a note that it's not a real skill check
+- Case Study → a plain-facts summary built from the milestone/audit data directly
 
 This is why the app stays fully usable in local development without a real `GEMINI_API_KEY`.
 

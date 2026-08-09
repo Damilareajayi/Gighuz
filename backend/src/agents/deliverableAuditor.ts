@@ -1,9 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { v4 as uuidv4 } from 'uuid';
 import { db } from '../services/firebase';
 import { captureEscrow } from '../services/stripe';
 import { routePayout } from '../services/payouts';
 import { runCommsAgent } from './commsAgent';
-import { AuditorInput, AuditorOutput, Freelancer } from '../types';
+import { runCaseStudyAgent } from './caseStudyAgent';
+import { AuditorInput, AuditorOutput, Freelancer, Job, CaseStudy } from '../types';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -129,6 +131,39 @@ export async function runDeliverableAuditor(input: AuditorInput): Promise<Audito
           milestoneName: milestone.name,
         },
       });
+
+      // Build the freelancer's portfolio automatically — no extra effort on their part.
+      try {
+        const jobDoc = await db().collection('jobs').doc(milestone.jobId).get();
+        const job = jobDoc.data() as Job | undefined;
+
+        const caseStudyOutput = await runCaseStudyAgent({
+          jobTitle: job?.title || milestone.name,
+          milestoneName: milestone.name,
+          deliverableDescription: milestone.deliverableDescription,
+          acceptanceCriteria: milestone.acceptanceCriteria,
+          submissionNotes: submission.notes,
+          skillsUsed: job?.skillsRequired || [],
+          auditFeedback: output.feedback,
+        });
+
+        const caseStudy: CaseStudy = {
+          id: uuidv4(),
+          freelancerId: freelancer.id,
+          jobId: milestone.jobId,
+          milestoneId: milestone.id,
+          jobTitle: job?.title || milestone.name,
+          summary: caseStudyOutput.summary,
+          skillsUsed: job?.skillsRequired || [],
+          outcomeHighlight: caseStudyOutput.outcomeHighlight,
+          createdAt: new Date().toISOString(),
+        };
+
+        await db().collection('freelancers').doc(freelancer.id)
+          .collection('caseStudies').doc(caseStudy.id).set(caseStudy);
+      } catch (err) {
+        console.error('[DeliverableAuditor] Case study generation failed:', err);
+      }
     }
   } else {
     await db().collection('milestones').doc(milestone.id).update({

@@ -5,8 +5,9 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
 import { createMilestoneEscrow } from '../services/stripe';
 import { routePayout } from '../services/payouts';
-import { MilestoneInstance, Job } from '../types';
+import { MilestoneInstance, Job, ChangeRequest } from '../types';
 import { runCommsAgent } from '../agents/commsAgent';
+import { runScopeGuardAgent } from '../agents/scopeGuardAgent';
 
 const router = Router();
 
@@ -14,6 +15,10 @@ const CreateMilestoneSchema = z.object({
   jobId: z.string(),
   milestoneTemplateId: z.string(),
   freelancerId: z.string(),
+});
+
+const ChangeRequestSchema = z.object({
+  description: z.string().min(10).max(2000),
 });
 
 // POST /payments/milestones — recruiter funds a milestone (creates escrow)
@@ -148,6 +153,65 @@ router.post('/payout/:milestoneId', requireAuth(['admin']), async (req: AuthRequ
     return res.json({ success: true, data: { reference, amountPaid: freelancerAmt, provider: payout.provider } });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /payments/milestones/:id/change-requests — recruiter asks for a change;
+// the Scope Guard Agent rules whether it's free or needs its own payment
+router.post('/milestones/:id/change-requests', requireAuth(['recruiter']), async (req: AuthRequest, res: Response) => {
+  try {
+    const { description } = ChangeRequestSchema.parse(req.body);
+
+    const milestoneDoc = await db().collection('milestones').doc(req.params.id).get();
+    if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    const milestone = milestoneDoc.data() as MilestoneInstance;
+    if (milestone.recruiterId !== req.profileId) {
+      return res.status(403).json({ success: false, error: 'Not your milestone' });
+    }
+
+    const scopeResult = await runScopeGuardAgent({ milestone, requestDescription: description });
+
+    const changeRequest: ChangeRequest = {
+      id: uuidv4(),
+      milestoneId: milestone.id,
+      jobId: milestone.jobId,
+      recruiterId: milestone.recruiterId,
+      freelancerId: milestone.freelancerId,
+      description,
+      verdict: scopeResult.verdict,
+      reasoning: scopeResult.reasoning,
+      suggestedAdditionalAmountUsd: scopeResult.suggestedAdditionalAmountUsd,
+      createdAt: new Date().toISOString(),
+    };
+
+    await db().collection('changeRequests').doc(changeRequest.id).set(changeRequest);
+
+    return res.status(201).json({ success: true, data: changeRequest });
+  } catch (err: any) {
+    if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    return res.status(500).json({ success: false, error: err.message || 'Failed to create change request' });
+  }
+});
+
+// GET /payments/milestones/:id/change-requests — list them for a milestone
+router.get('/milestones/:id/change-requests', requireAuth(), async (req: AuthRequest, res: Response) => {
+  try {
+    const milestoneDoc = await db().collection('milestones').doc(req.params.id).get();
+    if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    const milestone = milestoneDoc.data() as MilestoneInstance;
+    const isParticipant = milestone.recruiterId === req.profileId || milestone.freelancerId === req.profileId;
+    if (!isParticipant) return res.status(403).json({ success: false, error: 'Not your milestone' });
+
+    const snap = await db().collection('changeRequests')
+      .where('milestoneId', '==', req.params.id)
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
+  } catch {
+    return res.status(500).json({ success: false, error: 'Failed to fetch change requests' });
   }
 });
 

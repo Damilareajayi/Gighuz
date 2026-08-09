@@ -7,6 +7,7 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
 import { uploadFile, extensionForMimeType } from '../services/storage';
 import { runResumeAgent } from '../agents/resumeAgent';
+import { runSkillVerificationAgent } from '../agents/skillVerificationAgent';
 import { Freelancer } from '../types';
 
 const router = Router();
@@ -211,6 +212,40 @@ router.post('/me/resume/generate', requireAuth(['freelancer']), resumeLimiter, a
     return res.json({ success: true, data: { resumeText, resumeSource: 'ai_generated' } });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message || 'Failed to generate resume' });
+  }
+});
+
+// POST /profiles/me/verify-skills — AI-check portfolio links against claimed skills
+router.post('/me/verify-skills', requireAuth(['freelancer']), resumeLimiter, async (req: AuthRequest, res: Response) => {
+  try {
+    const doc = await db().collection('freelancers').doc(req.profileId!).get();
+    if (!doc.exists) return res.status(404).json({ success: false, error: 'Profile not found' });
+
+    const freelancer = doc.data() as Freelancer;
+    const skillVerification = await runSkillVerificationAgent({
+      skills: freelancer.skills,
+      portfolioLinks: freelancer.portfolioLinks,
+    });
+
+    await db().collection('freelancers').doc(req.profileId!).update({
+      skillVerification,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return res.json({ success: true, data: { skillVerification } });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, error: err.message || 'Failed to verify skills' });
+  }
+});
+
+// GET /profiles/me/case-studies — freelancer's AI-generated portfolio entries
+router.get('/me/case-studies', requireAuth(['freelancer']), async (req: AuthRequest, res: Response) => {
+  try {
+    const snap = await db().collection('freelancers').doc(req.profileId!)
+      .collection('caseStudies').orderBy('createdAt', 'desc').limit(20).get();
+    return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
+  } catch {
+    return res.status(500).json({ success: false, error: 'Failed to fetch case studies' });
   }
 });
 

@@ -2,9 +2,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
-import { Star, MapPin, DollarSign, ExternalLink, Camera, FileText, Sparkles, Upload } from 'lucide-react';
+import { Star, MapPin, DollarSign, ExternalLink, Camera, FileText, Sparkles, Upload, ShieldCheck, BadgeCheck } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Freelancer } from '@/lib/types';
+import { Freelancer, CaseStudy } from '@/lib/types';
 import { timeAgo } from '@/lib/utils';
 
 function Avatar({ profile, onUpload, uploading }: {
@@ -44,6 +44,8 @@ function ProfileContent() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [resumeBusy, setResumeBusy] = useState<'' | 'uploading' | 'generating'>('');
   const resumeInputRef = useRef<HTMLInputElement>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
 
   const [bio, setBio] = useState('');
   const [skills, setSkills] = useState('');
@@ -60,7 +62,10 @@ function ProfileContent() {
       .catch((err) => setError(err.message));
   }
 
-  useEffect(() => { load().finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    load().finally(() => setLoading(false));
+    api.listCaseStudies().then((data: any) => setCaseStudies(data)).catch(() => {});
+  }, []);
 
   async function handleSave() {
     setSaving(true);
@@ -115,6 +120,19 @@ function ProfileContent() {
       setError(err.message || 'Failed to generate resume');
     } finally {
       setResumeBusy('');
+    }
+  }
+
+  async function handleVerifySkills() {
+    setError('');
+    setVerifying(true);
+    try {
+      const data = await api.verifySkills() as { skillVerification: Freelancer['skillVerification'] };
+      setProfile(p => p && { ...p, skillVerification: data.skillVerification });
+    } catch (err: any) {
+      setError(err.message || 'Failed to verify skills');
+    } finally {
+      setVerifying(false);
     }
   }
 
@@ -178,7 +196,14 @@ function ProfileContent() {
               </div>
 
               <div>
-                <p className="text-xs text-gray-500 mb-2">Skills</p>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-gray-500">Skills</p>
+                  {profile.skillVerification && (
+                    <span className={`text-xs font-semibold flex items-center gap-1 ${profile.skillVerification.score >= 60 ? 'text-teal-700' : 'text-gray-400'}`}>
+                      <BadgeCheck size={12} /> {profile.skillVerification.score}/100 AI-verified
+                    </span>
+                  )}
+                </div>
                 {editing ? (
                   <input className="w-full border border-surface-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal-500"
                     placeholder="Comma separated skills" value={skills} onChange={e => setSkills(e.target.value)} />
@@ -188,6 +213,9 @@ function ProfileContent() {
                       <span key={s} className="text-xs px-2.5 py-1 rounded-lg bg-gray-50 border border-surface-border text-gray-600">{s}</span>
                     ))}
                   </div>
+                )}
+                {profile.skillVerification && (
+                  <p className="text-xs text-gray-400 mt-2">{profile.skillVerification.notes}</p>
                 )}
               </div>
 
@@ -247,13 +275,52 @@ function ProfileContent() {
 
             {profile.portfolioLinks.length > 0 && (
               <div className="card space-y-3">
-                <p className="section-label">Portfolio & Links</p>
-                {profile.portfolioLinks.map((link) => (
-                  <a key={link} href={link} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center justify-between py-2 border-b border-surface-border last:border-0 text-sm text-teal-700 hover:text-orange-600 transition-colors">
-                    {link}
-                    <ExternalLink size={12} />
-                  </a>
+                <div className="flex items-center justify-between">
+                  <p className="section-label">Portfolio & Links</p>
+                  <button onClick={handleVerifySkills} disabled={verifying} className="btn-outline text-xs flex items-center gap-1.5">
+                    <ShieldCheck size={12} /> {verifying ? 'Verifying…' : 'Verify Skills with AI'}
+                  </button>
+                </div>
+                {profile.portfolioLinks.map((link) => {
+                  const linkResult = profile.skillVerification?.verifiedLinks.find(v => v.url === link);
+                  return (
+                    <div key={link} className="py-2 border-b border-surface-border last:border-0">
+                      <a href={link} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center justify-between text-sm text-teal-700 hover:text-orange-600 transition-colors">
+                        {link}
+                        <ExternalLink size={12} />
+                      </a>
+                      {linkResult && (
+                        <p className={`text-xs mt-1 ${linkResult.unreachable ? 'text-gray-400' : 'text-teal-600'}`}>
+                          {linkResult.unreachable ? 'Could not be reached' : linkResult.supportsSkills.length > 0 ? `Supports: ${linkResult.supportsSkills.join(', ')}` : 'No specific skills confirmed'}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {caseStudies.length > 0 && (
+              <div className="card space-y-3">
+                <p className="section-label">Case Studies</p>
+                <p className="text-xs text-gray-400 -mt-2">Auto-generated from your paid, audit-passed work — no extra effort required.</p>
+                {caseStudies.map((cs) => (
+                  <div key={cs.id} className="py-3 border-b border-surface-border last:border-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <h4 className="text-sm font-semibold text-gray-900">{cs.jobTitle}</h4>
+                      <span className="text-xs text-gray-400">{timeAgo(cs.createdAt)}</span>
+                    </div>
+                    <p className="text-xs font-medium text-teal-700 mb-1.5">{cs.outcomeHighlight}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{cs.summary}</p>
+                    {cs.skillsUsed.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {cs.skillsUsed.map(s => (
+                          <span key={s} className="text-xs px-2 py-0.5 rounded bg-gray-50 border border-surface-border text-gray-500">{s}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

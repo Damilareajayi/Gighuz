@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, BadgeCheck } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { formatCurrency } from '@/lib/utils';
@@ -58,7 +58,12 @@ function TalentContent() {
                   {f.name.split(' ').map(n => n[0]).join('')}
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{f.name}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="font-semibold text-gray-900">{f.name}</p>
+                    {f.skillVerification && f.skillVerification.score >= 60 && (
+                      <BadgeCheck size={13} className="text-teal-600" />
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400">{f.country}</p>
                 </div>
                 <div className="ml-auto">

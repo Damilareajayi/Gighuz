@@ -2,16 +2,67 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
-import { DollarSign, Lock, CheckCircle, ArrowRight, Globe } from 'lucide-react';
+import { DollarSign, Lock, CheckCircle, ArrowRight, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
-import { MilestoneInstance } from '@/lib/types';
+import { MilestoneInstance, ChangeRequest } from '@/lib/types';
 import { useAuth } from '@/lib/auth';
 
-function MilestoneRow({ m }: { m: MilestoneInstance }) {
+function ChangeRequestRow({ cr }: { cr: ChangeRequest }) {
+  const inScope = cr.verdict === 'in_scope';
+  return (
+    <div className={cn('rounded-lg p-3 border text-xs', inScope ? 'border-teal-100 bg-teal-50/50' : 'border-orange-100 bg-orange-50/50')}>
+      <p className="text-gray-700 mb-1.5">{cr.description}</p>
+      <div className={cn('flex items-center gap-1.5 font-semibold', inScope ? 'text-teal-700' : 'text-orange-600')}>
+        {inScope ? <ShieldCheck size={12} /> : <ShieldAlert size={12} />}
+        {inScope ? 'Free revision — within original scope' : `New work — suggested +${formatCurrency(cr.suggestedAdditionalAmountUsd || 0)}`}
+      </div>
+      {cr.reasoning && <p className="text-gray-500 mt-1">{cr.reasoning}</p>}
+    </div>
+  );
+}
+
+function MilestoneRow({ m, isRecruiter }: { m: MilestoneInstance; isRecruiter: boolean }) {
   const isPaid     = m.status === 'paid';
   const isFlagged  = m.status === 'flagged';
   const inEscrow   = ['pending', 'in_progress', 'submitted', 'auditing'].includes(m.status);
+  const canRequestChange = isRecruiter && ['in_progress', 'submitted', 'auditing'].includes(m.status);
+
+  const [expanded, setExpanded] = useState(false);
+  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([]);
+  const [loadedRequests, setLoadedRequests] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [description, setDescription] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  async function toggleExpanded() {
+    const next = !expanded;
+    setExpanded(next);
+    if (next && !loadedRequests) {
+      try {
+        const data = await api.listChangeRequests(m.id) as ChangeRequest[];
+        setChangeRequests(data);
+      } catch { /* non-critical */ }
+      setLoadedRequests(true);
+    }
+  }
+
+  async function handleSubmitChange() {
+    if (description.trim().length < 10) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const cr = await api.requestChange(m.id, description) as ChangeRequest;
+      setChangeRequests(prev => [cr, ...prev]);
+      setDescription('');
+      setShowForm(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit change request');
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className={cn('card border', isPaid ? 'border-surface-border opacity-70' : isFlagged ? 'border-red-200' : 'border-surface-border')}>
@@ -36,6 +87,38 @@ function MilestoneRow({ m }: { m: MilestoneInstance }) {
           <p className="text-xs text-gray-500 mt-0.5 capitalize">{m.status.replace('_', ' ')}</p>
         </div>
       </div>
+
+      {(canRequestChange || !isPaid) && (
+        <button onClick={toggleExpanded} className="text-xs text-gray-400 hover:text-teal-700 mt-2 flex items-center gap-1">
+          <MessageSquarePlus size={11} /> {expanded ? 'Hide' : 'Changes'} {changeRequests.length > 0 && `(${changeRequests.length})`}
+        </button>
+      )}
+
+      {expanded && (
+        <div className="mt-3 pt-3 border-t border-surface-border space-y-2">
+          {changeRequests.map(cr => <ChangeRequestRow key={cr.id} cr={cr} />)}
+          {changeRequests.length === 0 && <p className="text-xs text-gray-400">No change requests yet.</p>}
+
+          {canRequestChange && (
+            showForm ? (
+              <div className="space-y-2 pt-1">
+                <textarea className="w-full border border-surface-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-teal-500 resize-none h-16"
+                  placeholder="Describe the change you need — the Scope Guard Agent will rule whether it's covered by the original milestone or needs its own payment."
+                  value={description} onChange={e => setDescription(e.target.value)} />
+                {error && <p className="text-xs text-red-600">{error}</p>}
+                <div className="flex gap-2">
+                  <button onClick={handleSubmitChange} disabled={submitting || description.trim().length < 10} className="btn-primary text-xs px-3 py-1.5">
+                    {submitting ? 'Checking scope…' : 'Submit for scope check'}
+                  </button>
+                  <button onClick={() => setShowForm(false)} className="btn-outline text-xs px-3 py-1.5">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowForm(true)} className="btn-outline text-xs px-3 py-1.5">Request a change</button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -56,10 +139,11 @@ function PaymentsContent() {
   const total    = milestones.filter((m) => m.status === 'paid').reduce((s, m) => s + m.paymentAmountUsd, 0);
   const pending  = milestones.filter((m) => m.status === 'submitted' || m.status === 'auditing').reduce((s, m) => s + m.paymentAmountUsd, 0);
   const escrowed = milestones.filter((m) => m.status === 'pending' || m.status === 'in_progress').reduce((s, m) => s + m.paymentAmountUsd, 0);
+  const isRecruiter = profile?.role === 'recruiter';
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar role={profile?.role === 'recruiter' ? 'recruiter' : 'freelancer'} />
+      <Sidebar role={isRecruiter ? 'recruiter' : 'freelancer'} />
       <main className="ml-56 flex-1 p-6 space-y-6">
 
         <div>
@@ -102,7 +186,7 @@ function PaymentsContent() {
 
         <div className="grid grid-cols-3 gap-4">
           <div className="card">
-            <p className="text-xs text-gray-500 mb-1">Total {profile?.role === 'recruiter' ? 'Paid' : 'Earned'}</p>
+            <p className="text-xs text-gray-500 mb-1">Total {isRecruiter ? 'Paid' : 'Earned'}</p>
             <p className="text-2xl font-bold text-teal-700">{formatCurrency(total)}</p>
           </div>
           <div className="card">
@@ -129,7 +213,7 @@ function PaymentsContent() {
           )}
 
           <div className="space-y-3">
-            {milestones.map((m) => <MilestoneRow key={m.id} m={m} />)}
+            {milestones.map((m) => <MilestoneRow key={m.id} m={m} isRecruiter={isRecruiter} />)}
           </div>
         </div>
 

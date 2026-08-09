@@ -57,6 +57,8 @@ export const api = {
   uploadAvatar:   (file: File) => { const fd = new FormData(); fd.append('file', file); return apiUpload('/profiles/me/avatar', fd); },
   uploadResume:   (file: File) => { const fd = new FormData(); fd.append('file', file); return apiUpload('/profiles/me/resume', fd); },
   generateResume: () => apiFetch('/profiles/me/resume/generate', { method: 'POST' }),
+  verifySkills:   () => apiFetch('/profiles/me/verify-skills', { method: 'POST' }),
+  listCaseStudies:() => apiFetch('/profiles/me/case-studies'),
 
   // Submissions
   submit:         (body: object) => apiFetch('/submissions', { method: 'POST', body: JSON.stringify(body) }),
@@ -69,4 +71,7 @@ export const api = {
   // Payments
   createMilestone: (body: object) => apiFetch('/payments/milestones', { method: 'POST', body: JSON.stringify(body) }),
   listMilestones:  ()             => apiFetch('/payments/milestones'),
+  requestChange:      (milestoneId: string, description: string) =>
+    apiFetch(`/payments/milestones/${milestoneId}/change-requests`, { method: 'POST', body: JSON.stringify({ description }) }),
+  listChangeRequests: (milestoneId: string) => apiFetch(`/payments/milestones/${milestoneId}/change-requests`),
 };

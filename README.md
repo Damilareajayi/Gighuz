@@ -1,6 +1,6 @@
 # GigHuz
 
-AI-orchestrated global freelance marketplace connecting clients and freelance talent, anywhere in the world. Four Gemini-powered agents handle job structuring, talent matching, deliverable auditing, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route payouts.
+AI-orchestrated global freelance marketplace connecting clients and freelance talent, anywhere in the world. Eight Gemini-powered agents handle job structuring, talent matching, deliverable auditing, scope-creep rulings, skill verification, auto-generated case studies, résumé generation, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route payouts. See [ARCHITECTURE.md](./ARCHITECTURE.md) for why trust-enforced-up-front is the actual differentiator versus review-based marketplaces.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together,
 and [MOBILE.md](./MOBILE.md) for the iOS/Android app (a Capacitor shell

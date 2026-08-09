@@ -140,10 +140,11 @@ function PaymentsContent() {
   const pending  = milestones.filter((m) => m.status === 'submitted' || m.status === 'auditing').reduce((s, m) => s + m.paymentAmountUsd, 0);
   const escrowed = milestones.filter((m) => m.status === 'pending' || m.status === 'in_progress').reduce((s, m) => s + m.paymentAmountUsd, 0);
   const isRecruiter = profile?.role === 'recruiter';
+  const sidebarRole = profile?.role === 'recruiter' ? 'recruiter' : profile?.role === 'agent_developer' ? 'agent_developer' : 'freelancer';
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar role={isRecruiter ? 'recruiter' : 'freelancer'} />
+      <Sidebar role={sidebarRole} />
       <main className="ml-56 flex-1 p-6 space-y-6">
 
         <div>

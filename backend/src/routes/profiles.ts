@@ -8,9 +8,15 @@ import { db } from '../services/firebase';
 import { uploadFile, extensionForMimeType } from '../services/storage';
 import { runResumeAgent } from '../agents/resumeAgent';
 import { runSkillVerificationAgent } from '../agents/skillVerificationAgent';
-import { Freelancer } from '../types';
+import { Freelancer, UserRole } from '../types';
 
 const router = Router();
+
+function collectionForRole(role?: UserRole): 'freelancers' | 'recruiters' | 'agentDevelopers' {
+  if (role === 'freelancer') return 'freelancers';
+  if (role === 'agent_developer') return 'agentDevelopers';
+  return 'recruiters';
+}
 const resumeLimiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 const uploadImage = multer({
@@ -44,6 +50,12 @@ const FreelancerSchema = z.object({
 });
 
 const RecruiterSchema = z.object({
+  name: z.string().min(2).max(100),
+  company: z.string().optional(),
+  country: z.string().length(2),
+});
+
+const AgentDeveloperSchema = z.object({
   name: z.string().min(2).max(100),
   company: z.string().optional(),
   country: z.string().length(2),
@@ -118,10 +130,40 @@ router.post('/recruiter', async (req: AuthRequest, res: Response) => {
   }
 });
 
+// POST /profiles/agent-developer — onboard a new agent developer (free to join)
+router.post('/agent-developer', async (req: AuthRequest, res: Response) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return res.status(401).json({ success: false, error: 'Auth required' });
+
+    const decoded = await (await import('../services/firebase')).auth().verifyIdToken(token);
+    const data = AgentDeveloperSchema.parse(req.body);
+
+    const existing = await db().collection('agentDevelopers').where('uid', '==', decoded.uid).limit(1).get();
+    if (!existing.empty) {
+      return res.status(409).json({ success: false, error: 'Profile already exists' });
+    }
+
+    const id  = uuidv4();
+    const now = new Date().toISOString();
+    const profile = {
+      id, uid: decoded.uid, role: 'agent_developer',
+      ...data,
+      verified: false, totalEarnings: 0, completedTasks: 0, createdAt: now,
+    };
+
+    await db().collection('agentDevelopers').doc(id).set(profile);
+    return res.status(201).json({ success: true, data: profile });
+  } catch (err: any) {
+    if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    return res.status(500).json({ success: false, error: 'Failed to create profile' });
+  }
+});
+
 // GET /profiles/me — get own profile
 router.get('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
   try {
-    const collection = req.role === 'freelancer' ? 'freelancers' : 'recruiters';
+    const collection = collectionForRole(req.role);
     const doc = await db().collection(collection).doc(req.profileId!).get();
     return res.json({ success: true, data: doc.data() });
   } catch {
@@ -132,9 +174,11 @@ router.get('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
 // PATCH /profiles/me — update own profile
 router.patch('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
   try {
-    const collection = req.role === 'freelancer' ? 'freelancers' : 'recruiters';
+    const collection = collectionForRole(req.role);
     const allowed = req.role === 'freelancer'
       ? ['bio', 'skills', 'hourlyRate', 'currency', 'portfolioLinks', 'whatsappNumber', 'availability']
+      : req.role === 'agent_developer'
+      ? ['name', 'company', 'whatsappNumber', 'paystackRecipientCode', 'bankCode', 'accountNumber', 'accountName', 'currency']
       : ['name', 'company'];
 
     const updates: Record<string, unknown> = {};
@@ -158,7 +202,7 @@ router.post('/me/avatar', requireAuth(), uploadImage.single('file'), async (req:
     const ext = extensionForMimeType(req.file.mimetype) || 'jpg';
     const url = await uploadFile(`avatars/${req.profileId}`, req.file.buffer, req.file.mimetype, ext);
 
-    const collection = req.role === 'freelancer' ? 'freelancers' : 'recruiters';
+    const collection = collectionForRole(req.role);
     await db().collection(collection).doc(req.profileId!).update({
       profilePictureUrl: url,
       updatedAt: new Date().toISOString(),

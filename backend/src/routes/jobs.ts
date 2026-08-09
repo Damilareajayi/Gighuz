@@ -32,7 +32,7 @@ router.post('/', requireAuth(['recruiter']), async (req: AuthRequest, res: Respo
       descriptionRaw,
       status: 'pending_structure',
       source,
-      sourceUrl,
+      ...(sourceUrl ? { sourceUrl } : {}),
       structuredMilestones: [],
       skillsRequired: [],
       budgetMinUsd: 0,
@@ -136,20 +136,28 @@ router.post('/:id/match', requireAuth(['recruiter']), aiLimiter, async (req: Aut
   }
 });
 
-// POST /jobs/:id/assign — recruiter assigns a matched freelancer
+// POST /jobs/:id/assign — recruiter assigns a matched freelancer OR an AI agent listing
+const AssignSchema = z.object({
+  freelancerId: z.string().optional(),
+  agentListingId: z.string().optional(),
+}).refine((d) => Boolean(d.freelancerId) !== Boolean(d.agentListingId), {
+  message: 'Provide exactly one of freelancerId or agentListingId',
+});
+
 router.post('/:id/assign', requireAuth(['recruiter']), async (req: AuthRequest, res: Response) => {
   try {
-    const { freelancerId } = z.object({ freelancerId: z.string() }).parse(req.body);
+    const { freelancerId, agentListingId } = AssignSchema.parse(req.body);
     const doc = await db().collection('jobs').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ success: false, error: 'Job not found' });
 
     await db().collection('jobs').doc(req.params.id).update({
-      assignedFreelancerId: freelancerId,
+      assignedFreelancerId: freelancerId || null,
+      assignedAgentListingId: agentListingId || null,
       status: 'in_progress',
       updatedAt: new Date().toISOString(),
     });
 
-    return res.json({ success: true, message: 'Freelancer assigned' });
+    return res.json({ success: true, message: agentListingId ? 'AI agent assigned' : 'Freelancer assigned' });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
     return res.status(500).json({ success: false, error: 'Assignment failed' });

@@ -22,6 +22,7 @@ export function requireAuth(roles?: UserRole[]) {
       // Look up profile to get role
       const freelancerDoc = await db().collection('freelancers').where('uid', '==', decoded.uid).limit(1).get();
       const recruiterDoc  = await db().collection('recruiters').where('uid', '==', decoded.uid).limit(1).get();
+      const agentDevDoc   = await db().collection('agentDevelopers').where('uid', '==', decoded.uid).limit(1).get();
 
       if (!freelancerDoc.empty) {
         req.role = 'freelancer';
@@ -29,6 +30,9 @@ export function requireAuth(roles?: UserRole[]) {
       } else if (!recruiterDoc.empty) {
         req.role = 'recruiter';
         req.profileId = recruiterDoc.docs[0].id;
+      } else if (!agentDevDoc.empty) {
+        req.role = 'agent_developer';
+        req.profileId = agentDevDoc.docs[0].id;
       } else {
         return res.status(403).json({ success: false, error: 'Profile not found — complete onboarding first' });
       }

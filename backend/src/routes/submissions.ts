@@ -47,6 +47,7 @@ router.post('/', requireAuth(['freelancer']), async (req: AuthRequest, res: Resp
       id: submissionId,
       milestoneId: data.milestoneId,
       jobId: milestone.jobId,
+      workerType: 'human',
       freelancerId: req.profileId!,
       files: data.files,
       notes: data.notes,

@@ -19,6 +19,12 @@ export function initFirebase() {
         }),
       });
     }
+
+    // Several of our types have fields that are only set for one worker type
+    // (freelancerId vs. agentListingId/developerId) — without this, an
+    // object-shorthand property that happens to be undefined throws instead
+    // of just being omitted from the document.
+    getFirestore().settings({ ignoreUndefinedProperties: true });
   }
   return { db: getFirestore(), auth: getAuth() };
 }

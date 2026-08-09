@@ -31,7 +31,10 @@ export default function LoginPage() {
   const confirmationRef = useRef<ConfirmationResult | null>(null);
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
-  const [role, setRole] = useState<Role>(searchParams.get('role') === 'recruiter' ? 'recruiter' : 'freelancer');
+  const [role, setRole] = useState<Role>(() => {
+    const r = searchParams.get('role');
+    return r === 'recruiter' || r === 'agent_developer' ? r : 'freelancer';
+  });
   const [name, setName] = useState('');
   const [country, setCountry] = useState('US');
   const [bio, setBio] = useState('');
@@ -40,7 +43,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user && !needsOnboarding && profile) {
-      router.replace(profile.role === 'recruiter' ? '/dashboard' : '/submissions');
+      const home = profile.role === 'recruiter' ? '/dashboard' : profile.role === 'agent_developer' ? '/my-agents' : '/submissions';
+      router.replace(home);
     }
   }, [loading, user, needsOnboarding, profile, router]);
 
@@ -116,6 +120,12 @@ export default function LoginPage() {
           portfolioLinks: [],
           whatsappNumber: user?.phoneNumber || undefined,
         });
+      } else if (role === 'agent_developer') {
+        await completeOnboarding('agent_developer', {
+          name,
+          company: company || undefined,
+          country: country.toUpperCase(),
+        });
       } else {
         await completeOnboarding('recruiter', {
           name,
@@ -146,10 +156,14 @@ export default function LoginPage() {
           <h1 className="font-bold text-gray-900">Complete your profile</h1>
 
           <div className="flex gap-2">
-            {(['freelancer', 'recruiter'] as Role[]).map(r => (
-              <button key={r} onClick={() => setRole(r)}
-                className={`flex-1 text-sm px-3 py-2 rounded-lg border capitalize ${role === r ? 'border-teal-700 bg-teal-50 text-teal-700 font-semibold' : 'border-surface-border text-gray-500'}`}>
-                {r}
+            {([
+              { value: 'freelancer', label: 'Freelancer' },
+              { value: 'recruiter', label: 'Recruiter' },
+              { value: 'agent_developer', label: 'Agent Developer' },
+            ] as { value: Role; label: string }[]).map(r => (
+              <button key={r.value} onClick={() => setRole(r.value)}
+                className={`flex-1 text-xs px-2 py-2 rounded-lg border ${role === r.value ? 'border-teal-700 bg-teal-50 text-teal-700 font-semibold' : 'border-surface-border text-gray-500'}`}>
+                {r.label}
               </button>
             ))}
           </div>
@@ -171,8 +185,13 @@ export default function LoginPage() {
                 placeholder="Skills, comma separated (e.g. React, Node.js)" value={skills} onChange={e => setSkills(e.target.value)} />
             </>
           ) : (
-            <input className="w-full border border-surface-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal-500"
-              placeholder="Company (optional)" value={company} onChange={e => setCompany(e.target.value)} />
+            <>
+              <input className="w-full border border-surface-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal-500"
+                placeholder="Company (optional)" value={company} onChange={e => setCompany(e.target.value)} />
+              {role === 'agent_developer' && (
+                <p className="text-xs text-gray-400">You'll register your AI agents — free — right after this step.</p>
+              )}
+            </>
           )}
 
           {error && <p className="text-xs text-red-600">{error}</p>}

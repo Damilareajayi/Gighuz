@@ -44,6 +44,34 @@ The first five agents (structuring, matching, auditor, comms, resume) get GigHuz
 
 None of this requires the client or freelancer to do anything differently — it's automatic, which is the point.
 
+## AI Agent Marketplace
+
+GigHuz isn't just a marketplace *for* humans that happens to use AI internally — it's infrastructure for a third kind of worker: **third-party AI agents that anyone can register and get paid for**, matched into the exact same escrow + audit pipeline a human freelancer goes through.
+
+**Important naming distinction**: the 8 agents described above (`backend/src/agents/*.ts`) are GigHuz's own internal Gemini-powered workers that run the platform. **Agent Listings** (`AgentListing` / `agentListings` collection) are a completely separate thing — third-party developers' AI agents, registered with GigHuz to be *hired*. The word "agent" means two different things in this codebase; keep the distinction in mind when reading route/type names.
+
+### How it works
+
+1. A developer signs up as an **Agent Developer** (a third role alongside recruiter/freelancer) and registers an `AgentListing`: name, description, category, capabilities, an `endpointUrl` GigHuz will call, an optional auth header, and an indicative price per task. **Free to list** — no fee to register.
+2. A recruiter browses the Agent Catalog and assigns a listing to a job (`POST /jobs/:id/assign` with `agentListingId` instead of `freelancerId`) — the exact same endpoint humans use, just a different field.
+3. Funding a milestone (`POST /payments/milestones`) works identically regardless of worker type. For an agent-assigned milestone, once escrow is funded the backend immediately calls `services/agentInvoker.ts`, which POSTs the task to the listing's `endpointUrl` and waits for a response (see `backend/scripts/example-agent-server.js` for the reference contract both sides implement).
+4. The agent's response becomes a `Submission` exactly like a human's, and goes through `runDeliverableAuditor` — the same acceptance-criteria check, the same escrow capture, the same payout routing. The auditor doesn't know or care whether a human or a model produced the work.
+5. On a pass, `services/payoutTarget.ts` resolves who actually gets paid (a `Freelancer` or an `AgentDeveloper`) into one shape, so the rest of the payment pipeline — earnings updates, Comms notifications, the 18% platform fee — doesn't need worker-type-specific branches.
+
+### Worker-type polymorphism
+
+`Job`, `MilestoneInstance`, `Submission`, and `ChangeRequest` all carry a `workerType: 'human' | 'agent'` field, with `freelancerId`/`agentListingId`/`developerId` all optional and populated based on which type. This was a deliberate generalization of what used to be freelancer-only fields — see the `resolvePayoutTarget` pattern in `services/payoutTarget.ts` and `agents/deliverableAuditor.ts` for how the branching stays contained to one place instead of spreading `if (workerType === 'agent')` checks through every route.
+
+### Pricing: usage-based, not listing fees
+
+Registering an agent costs nothing. GigHuz's revenue on agent-fulfilled work is the same 18% platform fee already taken from human milestones, deducted from the payout — meaning a developer only makes money (and GigHuz only takes a cut) when a task is actually assigned, completed, and passes audit. There's no subscription or per-listing charge in v1.
+
+### Deliberately out of scope for v1
+
+- **No protocol-based auto-discovery** (e.g. MCP, agent-to-agent protocols) — registration is manual (developer fills in a form) by design, so GigHuz controls onboarding quality without betting on a still-maturing external standard.
+- **The Matching Agent doesn't rank agent listings** — recruiters browse the Agent Catalog and assign directly. Extending AI-driven matching to agents (not just humans) is a natural next step, not built yet.
+- **Agent-to-agent commissioning** (one agent hiring another to fulfill part of a task) isn't built. This would be the next major expansion of the idea, but it's a genuinely different trust/liability problem and shouldn't be bolted on casually.
+
 ## Backend (`backend/src`)
 
 ```
@@ -52,18 +80,23 @@ middleware/auth.ts     requireAuth(roles?) — verifies Firebase ID token, looks
                         role + profileId from Firestore (freelancers/recruiters
                         collections keyed by `uid`)
 routes/
-  jobs.ts               POST/GET /jobs, /:id/structure, /:id/match, /:id/assign
-  profiles.ts            onboarding, /me, /me/avatar, /me/resume(/generate),
+  jobs.ts               POST/GET /jobs, /:id/structure, /:id/match,
+                        /:id/assign (freelancerId OR agentListingId)
+  profiles.ts            onboarding for all 3 roles (incl. /agent-developer),
+                        /me, /me/avatar, /me/resume(/generate),
                         /me/verify-skills, /me/case-studies,
                         /freelancers (recruiter talent search)
-  submissions.ts         freelancer work submission → triggers the auditor
-  payments.ts             milestone escrow funding, manual payout trigger,
-                        /:id/change-requests (Scope Guard)
+  submissions.ts         human work submission → triggers the auditor
+  payments.ts             milestone escrow funding (either worker type),
+                        manual payout trigger, /:id/change-requests,
+                        the agent auto-invoke pipeline lives here
+  agentListings.ts        register/browse/list-mine/update AI agent listings
   webhooks.ts             Stripe + Flutterwave webhook receivers
-agents/
+agents/                  GigHuz's OWN internal agents (not third-party listings)
   structuringAgent.ts     raw description → title, milestones, budget, skills
   matchingAgent.ts        job → ranked freelancer matches
   deliverableAuditor.ts   submission → pass/flag, capture escrow + payout on pass
+                        (worker-type-agnostic — see Payments section)
   commsAgent.ts           event → WhatsApp message (via Gemini + Twilio)
   resumeAgent.ts          freelancer profile → generated resume text
   scopeGuardAgent.ts      change request vs. original milestone → in/out of scope
@@ -74,10 +107,17 @@ services/
   stripe.ts                escrow create/capture/cancel
   payouts.ts                Paystack/Flutterwave payout routing (NG → Paystack,
                         others → Flutterwave, by currency)
+  payoutTarget.ts           resolves a Freelancer OR AgentDeveloper into one
+                        payout shape — the worker-type-polymorphism seam
+  agentInvoker.ts            calls a third-party agent's endpointUrl with a task,
+                        returns its result (or a graceful failure)
   storage.ts                Firebase Storage upload helper (avatars, resumes)
   whatsapp.ts               Twilio WhatsApp send + message templates
   pubsub.ts                  Pub/Sub event publishing (best-effort, non-fatal)
 types/index.ts            Single source of truth for all shared types
+scripts/example-agent-server.js   Reference implementation of the agent
+                        invocation contract — run it locally to test the
+                        full assign → invoke → audit → payout loop
 ```
 
 ### Design choice: agents own persistence and side effects
@@ -107,12 +147,13 @@ This is why the app stays fully usable in local development without a real `GEMI
 
 ### Auth model
 
-There are no Firebase custom claims. Role is derived per-request: `requireAuth()` takes the verified `uid` and checks whether a `freelancers` or `recruiters` Firestore doc has a matching `uid` field, and attaches `role` + `profileId` to the request. A user who's authenticated with Firebase but hasn't completed onboarding (no matching Firestore doc) gets a 403, which the frontend (`needsOnboarding` in `lib/auth.tsx`) uses to route them into the profile-creation form.
+There are no Firebase custom claims. Role is derived per-request: `requireAuth()` takes the verified `uid` and checks `freelancers`, then `recruiters`, then `agentDevelopers` Firestore collections for a matching `uid` field, and attaches `role` + `profileId` to the request. A user who's authenticated with Firebase but hasn't completed onboarding (no matching Firestore doc in any of the three) gets a 403, which the frontend (`needsOnboarding` in `lib/auth.tsx`) uses to route them into the profile-creation form.
 
 ### Payments
 
-- **Escrow**: `POST /payments/milestones` creates a Stripe PaymentIntent with `capture_method: 'manual'` — funds are authorized but not captured until the auditor approves.
-- **Capture + payout**: on an auditor pass, `captureEscrow()` captures the Stripe PaymentIntent, then `routePayout()` sends the freelancer's cut (82% — 18% platform fee) via Paystack (Nigeria) or Flutterwave (everywhere else), keyed off the freelancer's `country`/`currency` fields.
+- **Escrow**: `POST /payments/milestones` creates a Stripe PaymentIntent with `capture_method: 'manual'` — funds are authorized but not captured until the auditor approves. Works identically whether the milestone is assigned to a `freelancerId` or an `agentListingId`.
+- **Capture + payout**: on an auditor pass, `captureEscrow()` captures the Stripe PaymentIntent, then `routePayout()` sends the worker's cut (82% — 18% platform fee) via Paystack (Nigeria) or Flutterwave (everywhere else), keyed off `resolvePayoutTarget()`'s `country`/`currency` fields — same fee, same routing logic, regardless of whether the recipient is a `Freelancer` or an `AgentDeveloper`.
+- **Agent auto-invocation**: for `workerType: 'agent'` milestones, there's no human "submit work" step — `routes/payments.ts` calls the agent's endpoint immediately after escrow funding and creates the `Submission` on its behalf. See the AI Agent Marketplace section above.
 - **Webhooks**: `routes/webhooks.ts` listens for `payment_intent.succeeded` / `.payment_failed` to flip a milestone's status without relying on the client to report back.
 
 ## Frontend (`frontend/src`)
@@ -123,9 +164,15 @@ app/layout.tsx          Wraps everything in AuthProvider; whole app is
                         depends on client-side Firebase auth state)
 app/login/page.tsx       Email/password, Google popup, and phone/SMS
                         (with country-code picker) sign-in; onboarding form
-                        for first-time users
-app/{dashboard,jobs,talent,agents}/     recruiter-facing pages
-app/{submissions,payments,profile}/     freelancer-facing pages
+                        with a 3-way role picker (freelancer/recruiter/
+                        agent_developer) for first-time users
+app/{dashboard,jobs,talent,agent-catalog,agents}/   recruiter-facing pages
+app/{submissions,payments,profile}/                 freelancer-facing pages
+app/my-agents/                                       agent-developer-facing:
+                        register/enable/disable listings, view stats
+app/jobs/page.tsx        also owns the assign-worker (human/agent tabs) and
+                        fund-milestone flow — the only place in the UI that
+                        actually starts a milestone once a job is structured
 components/RequireAuth.tsx    Redirects to /login if unauthenticated/
                         unonboarded; redirects to the right home if role
                         doesn't match the page

@@ -14,7 +14,8 @@ export function RequireAuth({ role, children }: { role?: Role; children: React.R
       return;
     }
     if (role && profile?.role !== role) {
-      router.replace(profile?.role === 'recruiter' ? '/dashboard' : '/submissions');
+      const home = profile?.role === 'recruiter' ? '/dashboard' : profile?.role === 'agent_developer' ? '/my-agents' : '/submissions';
+      router.replace(home);
     }
   }, [loading, user, needsOnboarding, profile, role, router]);
 

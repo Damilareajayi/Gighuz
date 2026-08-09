@@ -8,6 +8,7 @@ import profilesRouter from './routes/profiles';
 import submissionsRouter from './routes/submissions';
 import paymentsRouter from './routes/payments';
 import webhooksRouter from './routes/webhooks';
+import agentListingsRouter from './routes/agentListings';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -53,6 +54,7 @@ app.use('/api/profiles', profilesRouter);
 app.use('/api/submissions', submissionsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/webhooks', webhooksRouter);
+app.use('/api/agent-listings', agentListingsRouter);
 
 app.listen(PORT, () => console.log(`GigHuz API running on port ${PORT}`));
 export default app;

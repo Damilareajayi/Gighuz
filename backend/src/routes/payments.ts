@@ -5,26 +5,78 @@ import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
 import { createMilestoneEscrow } from '../services/stripe';
 import { routePayout } from '../services/payouts';
-import { MilestoneInstance, Job, ChangeRequest } from '../types';
+import { resolvePayoutTarget } from '../services/payoutTarget';
+import { invokeAgent } from '../services/agentInvoker';
+import { MilestoneInstance, Job, ChangeRequest, AgentListing, Submission } from '../types';
 import { runCommsAgent } from '../agents/commsAgent';
 import { runScopeGuardAgent } from '../agents/scopeGuardAgent';
+import { runDeliverableAuditor } from '../agents/deliverableAuditor';
 
 const router = Router();
 
 const CreateMilestoneSchema = z.object({
   jobId: z.string(),
   milestoneTemplateId: z.string(),
-  freelancerId: z.string(),
+  freelancerId: z.string().optional(),
+  agentListingId: z.string().optional(),
+}).refine((d) => Boolean(d.freelancerId) !== Boolean(d.agentListingId), {
+  message: 'Provide exactly one of freelancerId or agentListingId',
 });
 
 const ChangeRequestSchema = z.object({
   description: z.string().min(10).max(2000),
 });
 
+/**
+ * An AI-agent-fulfilled milestone doesn't wait for a human to log in and
+ * submit work — we invoke the agent's endpoint immediately once escrow is
+ * funded, wrap the result in a Submission, and run it through the exact
+ * same Deliverable Auditor a human's work goes through.
+ */
+async function runAgentMilestone(milestone: MilestoneInstance) {
+  try {
+    if (!milestone.agentListingId) return;
+    const listingDoc = await db().collection('agentListings').doc(milestone.agentListingId).get();
+    const listing = listingDoc.data() as AgentListing | undefined;
+    if (!listing) return;
+
+    const result = await invokeAgent(listing, {
+      taskId: milestone.id,
+      title: milestone.name,
+      description: milestone.deliverableDescription,
+      acceptanceCriteria: milestone.acceptanceCriteria,
+    });
+
+    const submissionId = uuidv4();
+    const now = new Date().toISOString();
+
+    const submission: Submission = {
+      id: submissionId,
+      milestoneId: milestone.id,
+      jobId: milestone.jobId,
+      workerType: 'agent',
+      agentListingId: listing.id,
+      developerId: listing.developerId,
+      files: [],
+      notes: result.success ? result.output : `Agent invocation failed: ${result.error}`,
+      deliverableType: 'other',
+      auditResult: 'pending',
+      submittedAt: now,
+    };
+
+    await db().collection('submissions').doc(submissionId).set(submission);
+    await db().collection('milestones').doc(milestone.id).update({ status: 'auditing', submittedAt: now });
+
+    await runDeliverableAuditor({ submission, milestone });
+  } catch (err) {
+    console.error('[Payments] Agent milestone pipeline failed:', err);
+  }
+}
+
 // POST /payments/milestones — recruiter funds a milestone (creates escrow)
 router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, res: Response) => {
   try {
-    const { jobId, milestoneTemplateId, freelancerId } = CreateMilestoneSchema.parse(req.body);
+    const { jobId, milestoneTemplateId, freelancerId, agentListingId } = CreateMilestoneSchema.parse(req.body);
 
     // Fetch job and find milestone template
     const jobDoc = await db().collection('jobs').doc(jobId).get();
@@ -37,6 +89,16 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
 
     const template = job.structuredMilestones.find((m) => m.id === milestoneTemplateId);
     if (!template) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    let developerId: string | undefined;
+    if (agentListingId) {
+      const listingDoc = await db().collection('agentListings').doc(agentListingId).get();
+      const listing = listingDoc.data() as AgentListing | undefined;
+      if (!listing || listing.status !== 'active') {
+        return res.status(404).json({ success: false, error: 'Agent listing not found or inactive' });
+      }
+      developerId = listing.developerId;
+    }
 
     // Create Stripe escrow
     const escrow = await createMilestoneEscrow(
@@ -55,7 +117,10 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
       id: milestoneId,
       jobId,
       milestoneTemplateId,
-      freelancerId,
+      workerType: agentListingId ? 'agent' : 'human',
+      ...(freelancerId ? { freelancerId } : {}),
+      ...(agentListingId ? { agentListingId } : {}),
+      ...(developerId ? { developerId } : {}),
       recruiterId: req.profileId!,
       name: template.name,
       deliverableDescription: template.deliverableDescription,
@@ -71,13 +136,23 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
 
     await db().collection('milestones').doc(milestoneId).set(milestone);
 
+    // Dev/demo convenience — in production, escrow funding completes via the
+    // Stripe webhook, which is where this would normally be triggered from.
+    if (agentListingId && process.env.NODE_ENV !== 'production') {
+      db().collection('milestones').doc(milestoneId).update({ status: 'in_progress', updatedAt: new Date().toISOString() })
+        .then(() => runAgentMilestone({ ...milestone, status: 'in_progress' }))
+        .catch((err) => console.error('[Payments] Failed to kick off agent milestone:', err));
+    }
+
     return res.status(201).json({
       success: true,
       data: {
         milestoneId,
         clientSecret: escrow.clientSecret,
         amount: template.paymentAmountUsd,
-        message: 'Escrow created — complete payment to activate milestone',
+        message: agentListingId
+          ? 'Escrow created — the agent has been invoked and will be audited automatically'
+          : 'Escrow created — complete payment to activate milestone',
       },
     });
   } catch (err: any) {
@@ -86,8 +161,7 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
   }
 });
 
-// POST /payments/payout/:milestoneId — triggered by milestone.approved event
-// (called internally by the pipeline after Auditor Agent approves)
+// POST /payments/payout/:milestoneId — manual payout trigger (admin override)
 router.post('/payout/:milestoneId', requireAuth(['admin']), async (req: AuthRequest, res: Response) => {
   try {
     const milestoneDoc = await db().collection('milestones').doc(req.params.milestoneId).get();
@@ -98,30 +172,23 @@ router.post('/payout/:milestoneId', requireAuth(['admin']), async (req: AuthRequ
       return res.status(400).json({ success: false, error: 'Milestone not yet approved by AI auditor' });
     }
 
-    // Fetch freelancer payout details
-    const freelancerDoc = await db().collection('freelancers').doc(milestone.freelancerId).get();
-    const freelancer = freelancerDoc.data();
-    if (!freelancer) return res.status(404).json({ success: false, error: 'Freelancer not found' });
+    const target = await resolvePayoutTarget(milestone);
+    if (!target) return res.status(404).json({ success: false, error: 'Payout recipient not found' });
 
     const reference = `GH-${milestone.id.slice(0, 8).toUpperCase()}`;
 
     // Platform fee: 18%
-    const platformFee  = milestone.paymentAmountUsd * 0.18;
-    const freelancerAmt = milestone.paymentAmountUsd - platformFee;
+    const platformFee = milestone.paymentAmountUsd * 0.18;
+    const payoutAmt = milestone.paymentAmountUsd - platformFee;
 
-    const payout = await routePayout(
-      milestone.freelancerId,
-      freelancerAmt,
-      reference,
-      {
-        country: freelancer.country,
-        paystackRecipientCode: freelancer.paystackRecipientCode,
-        bankCode: freelancer.bankCode,
-        accountNumber: freelancer.accountNumber,
-        accountName: freelancer.name,
-        currency: freelancer.currency,
-      }
-    );
+    const payout = await routePayout(target.id, payoutAmt, reference, {
+      country: target.country,
+      paystackRecipientCode: target.paystackRecipientCode,
+      bankCode: target.bankCode,
+      accountNumber: target.accountNumber,
+      accountName: target.accountName,
+      currency: target.currency,
+    });
 
     // Update milestone to paid
     await db().collection('milestones').doc(milestone.id).update({
@@ -131,26 +198,30 @@ router.post('/payout/:milestoneId', requireAuth(['admin']), async (req: AuthRequ
       updatedAt: new Date().toISOString(),
     });
 
-    // Update freelancer earnings
-    await db().collection('freelancers').doc(milestone.freelancerId).update({
-      totalEarnings: (freelancer.totalEarnings || 0) + Math.round(freelancerAmt * 100),
-      completedJobs: (freelancer.completedJobs || 0) + 1,
+    // Update recipient earnings
+    const targetRef = db().collection(target.collection).doc(target.id);
+    const targetData = (await targetRef.get()).data();
+    await targetRef.update({
+      totalEarnings: (targetData?.totalEarnings || 0) + Math.round(payoutAmt * 100),
+      ...(target.collection === 'freelancers'
+        ? { completedJobs: (targetData?.completedJobs || 0) + 1 }
+        : { completedTasks: (targetData?.completedTasks || 0) + 1 }),
     });
 
-    // Notify freelancer
+    // Notify recipient
     await runCommsAgent({
       type: 'payment_sent',
-      recipientId: milestone.freelancerId,
-      recipientRole: 'freelancer',
-      whatsappNumber: freelancer.whatsappNumber,
+      recipientId: target.id,
+      recipientRole: target.commsRole,
+      whatsappNumber: target.whatsappNumber,
       context: {
-        amount: `$${freelancerAmt.toFixed(2)}`,
+        amount: `$${payoutAmt.toFixed(2)}`,
         reference,
         milestoneName: milestone.name,
       },
     });
 
-    return res.json({ success: true, data: { reference, amountPaid: freelancerAmt, provider: payout.provider } });
+    return res.json({ success: true, data: { reference, amountPaid: payoutAmt, provider: payout.provider } });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message });
   }
@@ -177,11 +248,13 @@ router.post('/milestones/:id/change-requests', requireAuth(['recruiter']), async
       milestoneId: milestone.id,
       jobId: milestone.jobId,
       recruiterId: milestone.recruiterId,
-      freelancerId: milestone.freelancerId,
+      workerType: milestone.workerType,
+      ...(milestone.freelancerId ? { freelancerId: milestone.freelancerId } : {}),
+      ...(milestone.developerId ? { developerId: milestone.developerId } : {}),
       description,
       verdict: scopeResult.verdict,
-      reasoning: scopeResult.reasoning,
-      suggestedAdditionalAmountUsd: scopeResult.suggestedAdditionalAmountUsd,
+      ...(scopeResult.reasoning ? { reasoning: scopeResult.reasoning } : {}),
+      ...(scopeResult.suggestedAdditionalAmountUsd !== undefined ? { suggestedAdditionalAmountUsd: scopeResult.suggestedAdditionalAmountUsd } : {}),
       createdAt: new Date().toISOString(),
     };
 
@@ -201,7 +274,9 @@ router.get('/milestones/:id/change-requests', requireAuth(), async (req: AuthReq
     if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
 
     const milestone = milestoneDoc.data() as MilestoneInstance;
-    const isParticipant = milestone.recruiterId === req.profileId || milestone.freelancerId === req.profileId;
+    const isParticipant = milestone.recruiterId === req.profileId
+      || milestone.freelancerId === req.profileId
+      || milestone.developerId === req.profileId;
     if (!isParticipant) return res.status(403).json({ success: false, error: 'Not your milestone' });
 
     const snap = await db().collection('changeRequests')
@@ -218,7 +293,10 @@ router.get('/milestones/:id/change-requests', requireAuth(), async (req: AuthReq
 // GET /payments/milestones — list milestones for current user
 router.get('/milestones', requireAuth(), async (req: AuthRequest, res: Response) => {
   try {
-    const field = req.role === 'freelancer' ? 'freelancerId' : 'recruiterId';
+    const field = req.role === 'freelancer' ? 'freelancerId'
+      : req.role === 'agent_developer' ? 'developerId'
+      : 'recruiterId';
+
     const snap = await db()
       .collection('milestones')
       .where(field, '==', req.profileId)

@@ -20,6 +20,7 @@ export interface Job {
   status: string;
   source: 'direct' | 'scraped';
   assignedFreelancerId?: string;
+  assignedAgentListingId?: string;
   matchedCandidateIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -87,11 +88,56 @@ export interface Recruiter {
   createdAt: string;
 }
 
+export interface AgentDeveloper {
+  id: string;
+  uid: string;
+  role: 'agent_developer';
+  name: string;
+  company?: string;
+  country: string;
+  profilePictureUrl?: string;
+  verified: boolean;
+  totalEarnings: number;
+  completedTasks: number;
+  createdAt: string;
+  whatsappNumber?: string;
+}
+
+export type AgentCategory =
+  | 'digital_marketing'
+  | 'graphic_design'
+  | 'software_development'
+  | 'seo'
+  | 'content_writing'
+  | 'data_analysis'
+  | 'customer_support'
+  | 'other';
+
+export interface AgentListing {
+  id: string;
+  developerId: string;
+  name: string;
+  description: string;
+  category: AgentCategory;
+  capabilities: string[];
+  endpointUrl: string;
+  pricePerTaskUsd: number;
+  status: 'active' | 'disabled';
+  completedTasks: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type WorkerType = 'human' | 'agent';
+
 export interface MilestoneInstance {
   id: string;
   jobId: string;
   milestoneTemplateId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  agentListingId?: string;
+  developerId?: string;
   recruiterId: string;
   name: string;
   deliverableDescription: string;
@@ -114,7 +160,9 @@ export interface ChangeRequest {
   milestoneId: string;
   jobId: string;
   recruiterId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  developerId?: string;
   description: string;
   verdict: 'in_scope' | 'out_of_scope' | 'pending';
   reasoning?: string;
@@ -126,7 +174,10 @@ export interface Submission {
   id: string;
   milestoneId: string;
   jobId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  agentListingId?: string;
+  developerId?: string;
   files: { name: string; url: string; type: string; sizeBytes: number }[];
   notes: string;
   deliverableType: 'code' | 'writing' | 'design' | 'data' | 'other';

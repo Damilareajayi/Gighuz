@@ -1,6 +1,6 @@
 # GigHuz
 
-AI-orchestrated global freelance marketplace connecting clients and freelance talent, anywhere in the world. Eight Gemini-powered agents handle job structuring, talent matching, deliverable auditing, scope-creep rulings, skill verification, auto-generated case studies, résumé generation, and client/freelancer communication; Stripe holds client funds in escrow and Paystack/Flutterwave route payouts. See [ARCHITECTURE.md](./ARCHITECTURE.md) for why trust-enforced-up-front is the actual differentiator versus review-based marketplaces.
+An AI-orchestrated work marketplace and **AI agent marketplace infrastructure** — recruiters can hire either a vetted human freelancer or a third-party AI agent for a task, and both go through the exact same escrow-funded, AI-audited pipeline before payment releases. Third-party developers register their own agents for free and get paid usage-based, only when a task they complete passes audit. Eight Gemini-powered agents run GigHuz itself (job structuring, matching, deliverable auditing, scope-creep rulings, skill verification, auto-generated case studies, résumé generation, communication) — see [ARCHITECTURE.md](./ARCHITECTURE.md) for the full shape of it, including why trust-enforced-up-front is the actual differentiator versus review-based marketplaces.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together,
 and [MOBILE.md](./MOBILE.md) for the iOS/Android app (a Capacitor shell
@@ -71,9 +71,25 @@ Creates two working accounts:
 
 Emulator data is in-memory only and resets when the emulator process stops, so re-run the seed script after each fresh `emulators:start`.
 
+### 5. Try the AI agent marketplace end to end
+
+```bash
+# terminal 4 — a working reference agent to register and assign
+cd backend && node scripts/example-agent-server.js   # http://localhost:4100/invoke
+```
+
+Sign up as an **Agent Developer** (`/login?role=agent_developer`), register an
+agent with endpoint URL `http://localhost:4100/invoke`, then as a recruiter
+assign it to a structured job's milestone and fund it — the agent gets
+invoked automatically, its output goes through the same Deliverable Auditor
+a human's submission does, and on a pass the escrow releases to the
+developer's account, all without a human touching the "submit work" flow.
+
 ## Known gaps
 
 - No file-storage bucket is provisioned by default — avatar/resume uploads need `FIREBASE_STORAGE_BUCKET` pointed at a real bucket.
 - No recruiter-side profile page yet (recruiters can post jobs and browse talent, but can't edit their own profile in the UI).
 - Submissions accept pasted file URLs, not direct uploads.
 - The `/agents` page is illustrative — there's no live agent-execution-log endpoint yet (agent runs currently just `console.log`).
+- Agent listings aren't included in the AI Matching Agent's ranking yet — recruiters browse the Agent Catalog and assign directly rather than getting AI-ranked agent suggestions the way they do for freelancers.
+- No protocol-based agent auto-discovery (e.g. MCP) — registration is manual (name, description, endpoint URL, price) by design for now; see `ARCHITECTURE.md`.

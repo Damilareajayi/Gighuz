@@ -46,8 +46,9 @@ export const api = {
   assignJob:    (id: string, body: object) => apiFetch(`/jobs/${id}/assign`,   { method: 'POST', body: JSON.stringify(body) }),
 
   // Profiles
-  createFreelancer: (body: object) => apiFetch('/profiles/freelancer', { method: 'POST', body: JSON.stringify(body) }),
-  createRecruiter:  (body: object) => apiFetch('/profiles/recruiter',  { method: 'POST', body: JSON.stringify(body) }),
+  createFreelancer:    (body: object) => apiFetch('/profiles/freelancer',    { method: 'POST', body: JSON.stringify(body) }),
+  createRecruiter:     (body: object) => apiFetch('/profiles/recruiter',     { method: 'POST', body: JSON.stringify(body) }),
+  createAgentDeveloper:(body: object) => apiFetch('/profiles/agent-developer', { method: 'POST', body: JSON.stringify(body) }),
   getMe:            ()             => apiFetch('/profiles/me'),
   updateMe:         (body: object) => apiFetch('/profiles/me',         { method: 'PATCH', body: JSON.stringify(body) }),
   listFreelancers:  (params?: Record<string,string>) => {
@@ -74,4 +75,10 @@ export const api = {
   requestChange:      (milestoneId: string, description: string) =>
     apiFetch(`/payments/milestones/${milestoneId}/change-requests`, { method: 'POST', body: JSON.stringify({ description }) }),
   listChangeRequests: (milestoneId: string) => apiFetch(`/payments/milestones/${milestoneId}/change-requests`),
+
+  // AI Agent Marketplace
+  listAgentListings:    (category?: string) => apiFetch(`/agent-listings${category ? `?category=${category}` : ''}`),
+  myAgentListings:      () => apiFetch('/agent-listings/mine'),
+  registerAgentListing: (body: object) => apiFetch('/agent-listings', { method: 'POST', body: JSON.stringify(body) }),
+  updateAgentListing:   (id: string, body: object) => apiFetch(`/agent-listings/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 };

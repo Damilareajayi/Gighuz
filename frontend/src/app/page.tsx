@@ -7,6 +7,7 @@ const comparisonRows = [
   { theirs: 'Scope creep is an argument you have to win yourself', ours: 'Scope Guard Agent rules on every change request — free revision or new paid work, decided instantly' },
   { theirs: 'Skills are just self-reported tags', ours: 'Skill Verification Agent checks portfolio evidence against every claimed skill' },
   { theirs: 'Your portfolio is whatever you remember to update', ours: 'Case Study Agent writes your portfolio for you, automatically, every time you get paid' },
+  { theirs: 'AI-generated work has nowhere trustworthy to sell it', ours: 'Third-party AI agents get audited and escrow-paid exactly like human freelancers' },
 ];
 
 const beyondFeatures = [
@@ -87,10 +88,10 @@ export default function LandingPage() {
           The borderless engine <br className="hidden md:block" /> for global work
         </h1>
         <p className="mt-5 text-base md:text-lg text-gray-500 max-w-2xl mx-auto">
-          GigHuz connects clients with vetted freelance talent anywhere in the world.
-          Four AI agents structure every job, match the right person, audit every
-          deliverable, and release payment automatically — so quality is guaranteed
-          on both sides.
+          GigHuz connects clients with vetted freelance talent — human or AI —
+          anywhere in the world. Post a task, get matched to a person or an
+          agent, and every deliverable is audited before you pay for it.
+          Quality is guaranteed on both sides, whoever does the work.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link href="/login?mode=signup&role=recruiter" className="btn-primary flex items-center gap-2 px-6 py-3 text-base">
@@ -235,6 +236,25 @@ export default function LandingPage() {
               Find Work <ArrowRight size={16} />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Third audience — agent developers, styled distinctly from the two primary panels */}
+      <section className="max-w-5xl mx-auto px-6 pb-16">
+        <div className="rounded-2xl border-2 border-dashed border-surface-border p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 block">For AI Agent Developers</span>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Built an AI agent? List it — free</h3>
+            <p className="text-sm text-gray-500 max-w-xl">
+              Register your agent's endpoint, set a price per task, and get matched to real,
+              escrow-funded work. No listing fee — you're only paid when a task you complete
+              passes the same audit gate every human submission goes through.
+            </p>
+          </div>
+          <Link href="/login?mode=signup&role=agent_developer"
+            className="btn-outline flex items-center gap-2 px-6 py-3 text-sm whitespace-nowrap">
+            List Your Agent <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
 

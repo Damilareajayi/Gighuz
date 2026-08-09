@@ -12,7 +12,7 @@ import {
 import { auth } from './firebase';
 import { api } from './api';
 
-export type Role = 'recruiter' | 'freelancer';
+export type Role = 'recruiter' | 'freelancer' | 'agent_developer';
 
 interface Profile {
   id: string;
@@ -82,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function completeOnboarding(role: Role, profileData: object) {
     if (role === 'freelancer') {
       await api.createFreelancer(profileData);
+    } else if (role === 'agent_developer') {
+      await api.createAgentDeveloper(profileData);
     } else {
       await api.createRecruiter(profileData);
     }

@@ -1,6 +1,6 @@
 // ─── GigHuz Core Domain Types ────────────────────────────────────────────────
 
-export type UserRole = 'recruiter' | 'freelancer' | 'admin';
+export type UserRole = 'recruiter' | 'freelancer' | 'agent_developer' | 'admin';
 
 export interface Recruiter {
   id: string;
@@ -51,6 +51,72 @@ export interface Freelancer {
   accountName?: string;
 }
 
+// ─── AI Agent Marketplace ─────────────────────────────────────────────────────
+// Third-party developers register agents here; recruiters can assign one to a
+// job the same way they'd assign a human freelancer. Same escrow + audit gate
+// either way — the auditor doesn't care who/what produced the submission.
+
+export type AgentCategory =
+  | 'digital_marketing'
+  | 'graphic_design'
+  | 'software_development'
+  | 'seo'
+  | 'content_writing'
+  | 'data_analysis'
+  | 'customer_support'
+  | 'other';
+
+export interface AgentDeveloper {
+  id: string;
+  uid: string;
+  role: 'agent_developer';
+  name: string;
+  company?: string;
+  country: string;
+  profilePictureUrl?: string;
+  verified: boolean;
+  totalEarnings: number;                // cents (USD)
+  completedTasks: number;
+  createdAt: string;
+  // Payout routing details (same shape as Freelancer)
+  paystackRecipientCode?: string;
+  bankCode?: string;
+  accountNumber?: string;
+  accountName?: string;
+  currency?: string;
+  whatsappNumber?: string;
+}
+
+export interface AgentListing {
+  id: string;
+  developerId: string;
+  name: string;
+  description: string;
+  category: AgentCategory;
+  capabilities: string[];
+  endpointUrl: string;
+  authHeader?: string;                  // sent as `Authorization: <value>` when invoking
+  pricePerTaskUsd: number;              // indicative rate shown in the catalog
+  status: 'active' | 'disabled';
+  completedTasks: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentInvocationRequest {
+  taskId: string;
+  title: string;
+  description: string;
+  acceptanceCriteria: string[];
+}
+
+export interface AgentInvocationResult {
+  success: boolean;
+  output: string;
+  outputUrls?: string[];
+  error?: string;
+}
+
 export type JobStatus =
   | 'pending_structure'   // just posted, Structuring Agent not yet run
   | 'structured'          // milestones defined, awaiting matching
@@ -83,6 +149,7 @@ export interface Job {
   source: 'direct' | 'scraped';
   sourceUrl?: string;
   assignedFreelancerId?: string;
+  assignedAgentListingId?: string;
   matchedCandidateIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -97,11 +164,16 @@ export type MilestoneStatus =
   | 'paid'
   | 'flagged';
 
+export type WorkerType = 'human' | 'agent';
+
 export interface MilestoneInstance {
   id: string;
   jobId: string;
   milestoneTemplateId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;                // set when workerType === 'human'
+  agentListingId?: string;              // set when workerType === 'agent'
+  developerId?: string;                 // denormalized owner of agentListingId, for querying "my milestones"
   recruiterId: string;
   name: string;
   deliverableDescription: string;
@@ -127,7 +199,9 @@ export interface ChangeRequest {
   milestoneId: string;
   jobId: string;
   recruiterId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  developerId?: string;
   description: string;
   verdict: ChangeRequestVerdict;
   reasoning?: string;
@@ -167,7 +241,10 @@ export interface Submission {
   id: string;
   milestoneId: string;
   jobId: string;
-  freelancerId: string;
+  workerType: WorkerType;
+  freelancerId?: string;                // set when workerType === 'human'
+  agentListingId?: string;              // set when workerType === 'agent'
+  developerId?: string;
   files: SubmissionFile[];
   notes: string;
   deliverableType: 'code' | 'writing' | 'design' | 'data' | 'other';
@@ -231,7 +308,7 @@ export type CommsEventType =
 export interface CommsAgentInput {
   type: CommsEventType;
   recipientId: string;
-  recipientRole: 'recruiter' | 'freelancer';
+  recipientRole: 'recruiter' | 'freelancer' | 'agent_developer';
   whatsappNumber?: string;
   email?: string;
   context: Record<string, string | number>;

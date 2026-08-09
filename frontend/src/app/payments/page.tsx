@@ -2,10 +2,10 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
-import { DollarSign, Lock, CheckCircle, ArrowRight, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { DollarSign, Lock, CheckCircle, ArrowRight, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
-import { MilestoneInstance, ChangeRequest } from '@/lib/types';
+import { MilestoneInstance, ChangeRequest, Rating } from '@/lib/types';
 import { useAuth } from '@/lib/auth';
 
 function ChangeRequestRow({ cr }: { cr: ChangeRequest }) {
@@ -18,6 +18,79 @@ function ChangeRequestRow({ cr }: { cr: ChangeRequest }) {
         {inScope ? 'Free revision — within original scope' : `New work — suggested +${formatCurrency(cr.suggestedAdditionalAmountUsd || 0)}`}
       </div>
       {cr.reasoning && <p className="text-gray-500 mt-1">{cr.reasoning}</p>}
+    </div>
+  );
+}
+
+function StarPicker({ value, onChange, readOnly }: { value: number; onChange?: (n: number) => void; readOnly?: boolean }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button key={n} type="button" disabled={readOnly}
+          onClick={() => onChange?.(n)}
+          className={cn(readOnly ? 'cursor-default' : 'cursor-pointer hover:scale-110 transition-transform')}>
+          <Star size={16} className={n <= value ? 'fill-orange-500 text-orange-500' : 'text-gray-300'} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function RatingWidget({ milestoneId, isRecruiter }: { milestoneId: string; isRecruiter: boolean }) {
+  const [rating, setRating] = useState<Rating | null | undefined>(undefined); // undefined = loading
+  const [pendingScore, setPendingScore] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.getMilestoneRating(milestoneId).then((data: any) => setRating(data)).catch(() => setRating(null));
+  }, [milestoneId]);
+
+  async function handleSubmit() {
+    if (pendingScore === 0) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const r = await api.rateMilestone(milestoneId, pendingScore, feedback || undefined) as Rating;
+      setRating(r);
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit rating');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (rating === undefined) return null;
+
+  if (rating) {
+    return (
+      <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+        <span>{isRecruiter ? 'Your rating:' : 'Rated:'}</span>
+        <StarPicker value={rating.score} readOnly />
+        {rating.feedback && <span className="text-gray-400">"{rating.feedback}"</span>}
+      </div>
+    );
+  }
+
+  if (!isRecruiter) return null;
+
+  return (
+    <div className="mt-2 pt-2 border-t border-surface-border space-y-1.5">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500">Rate this work:</span>
+        <StarPicker value={pendingScore} onChange={setPendingScore} />
+      </div>
+      {pendingScore > 0 && (
+        <div className="flex gap-2">
+          <input className="flex-1 border border-surface-border rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-teal-500"
+            placeholder="Optional feedback" value={feedback} onChange={e => setFeedback(e.target.value)} />
+          <button onClick={handleSubmit} disabled={submitting} className="btn-primary text-xs px-3 py-1">
+            {submitting ? 'Submitting…' : 'Submit'}
+          </button>
+        </div>
+      )}
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -65,11 +138,11 @@ function MilestoneRow({ m, isRecruiter }: { m: MilestoneInstance; isRecruiter: b
   }
 
   return (
-    <div className={cn('card border', isPaid ? 'border-surface-border opacity-70' : isFlagged ? 'border-red-200' : 'border-surface-border')}>
+    <div className={cn('card border', isPaid ? 'border-surface-border' : isFlagged ? 'border-red-200' : 'border-surface-border')}>
       <div className="flex items-center gap-4">
         <div className={cn('w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-          isPaid ? 'bg-gray-100' : isFlagged ? 'bg-red-50' : 'bg-orange-50')}>
-          {isPaid && <CheckCircle size={16} className="text-gray-400" />}
+          isPaid ? 'bg-teal-50' : isFlagged ? 'bg-red-50' : 'bg-orange-50')}>
+          {isPaid && <CheckCircle size={16} className="text-teal-600" />}
           {isFlagged && <Lock size={16} className="text-red-500" />}
           {inEscrow && <Lock size={16} className="text-orange-500" />}
         </div>
@@ -81,14 +154,16 @@ function MilestoneRow({ m, isRecruiter }: { m: MilestoneInstance; isRecruiter: b
           )}
         </div>
         <div className="text-right shrink-0">
-          <p className={cn('text-base font-bold tabular-nums', isPaid ? 'text-gray-400' : isFlagged ? 'text-red-600' : 'text-orange-600')}>
+          <p className={cn('text-base font-bold tabular-nums', isPaid ? 'text-teal-700' : isFlagged ? 'text-red-600' : 'text-orange-600')}>
             {formatCurrency(m.paymentAmountUsd)}
           </p>
           <p className="text-xs text-gray-500 mt-0.5 capitalize">{m.status.replace('_', ' ')}</p>
         </div>
       </div>
 
-      {(canRequestChange || !isPaid) && (
+      {isPaid && <RatingWidget milestoneId={m.id} isRecruiter={isRecruiter} />}
+
+      {canRequestChange && (
         <button onClick={toggleExpanded} className="text-xs text-gray-400 hover:text-teal-700 mt-2 flex items-center gap-1">
           <MessageSquarePlus size={11} /> {expanded ? 'Hide' : 'Changes'} {changeRequests.length > 0 && `(${changeRequests.length})`}
         </button>

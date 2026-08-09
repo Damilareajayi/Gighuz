@@ -83,8 +83,8 @@ function TalentContent() {
                   <p className="text-[10px] text-gray-400">AI Score</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2">
-                  <p className="text-sm font-bold text-gray-800">⭐ {f.averageRating}</p>
-                  <p className="text-[10px] text-gray-400">Rating</p>
+                  <p className="text-sm font-bold text-gray-800">{f.ratingCount > 0 ? `⭐ ${f.averageRating.toFixed(1)}` : '—'}</p>
+                  <p className="text-[10px] text-gray-400">{f.ratingCount > 0 ? `${f.ratingCount} rating${f.ratingCount === 1 ? '' : 's'}` : 'No ratings'}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2">
                   <p className="text-sm font-bold text-gray-800">{f.completedJobs}</p>

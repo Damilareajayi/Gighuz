@@ -58,6 +58,7 @@ async function main() {
     totalEarnings: 0,
     completedJobs: 3,
     averageRating: 4.8,
+    ratingCount: 3,
     currency: 'USD',
     hourlyRate: 35,
     whatsappNumber: '+233201234567',

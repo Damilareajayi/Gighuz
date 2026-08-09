@@ -35,6 +35,8 @@ router.post('/', requireAuth(['agent_developer']), async (req: AuthRequest, res:
       ...data,
       status: 'active',
       completedTasks: 0,
+      averageRating: 0,
+      ratingCount: 0,
       createdAt: now,
       updatedAt: now,
     };

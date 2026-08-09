@@ -65,6 +65,7 @@ export interface Freelancer {
   totalEarnings: number;
   completedJobs: number;
   averageRating: number;
+  ratingCount: number;
   createdAt: string;
   profilePictureUrl?: string;
   resumeUrl?: string;
@@ -124,11 +125,27 @@ export interface AgentListing {
   pricePerTaskUsd: number;
   status: 'active' | 'disabled';
   completedTasks: number;
+  averageRating: number;
+  ratingCount: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export type WorkerType = 'human' | 'agent';
+
+export interface Rating {
+  id: string;
+  milestoneId: string;
+  jobId: string;
+  recruiterId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  agentListingId?: string;
+  developerId?: string;
+  score: number;
+  feedback?: string;
+  createdAt: string;
+}
 
 export interface MilestoneInstance {
   id: string;

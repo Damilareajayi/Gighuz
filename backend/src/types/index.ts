@@ -37,6 +37,7 @@ export interface Freelancer {
   totalEarnings: number;                // cents (USD)
   completedJobs: number;
   averageRating: number;                // 0–5
+  ratingCount: number;
   createdAt: string;
   profilePictureUrl?: string;
   resumeUrl?: string;                   // uploaded resume file (PDF/DOC)
@@ -99,8 +100,24 @@ export interface AgentListing {
   pricePerTaskUsd: number;              // indicative rate shown in the catalog
   status: 'active' | 'disabled';
   completedTasks: number;
+  averageRating: number;                // 0–5, recruiter-submitted per milestone
+  ratingCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Rating {
+  id: string;
+  milestoneId: string;
+  jobId: string;
+  recruiterId: string;
+  workerType: WorkerType;
+  freelancerId?: string;
+  agentListingId?: string;
+  developerId?: string;
+  score: number;                        // 1–5
+  feedback?: string;
+  createdAt: string;
 }
 
 export interface AgentInvocationRequest {

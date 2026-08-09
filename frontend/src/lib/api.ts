@@ -75,6 +75,9 @@ export const api = {
   requestChange:      (milestoneId: string, description: string) =>
     apiFetch(`/payments/milestones/${milestoneId}/change-requests`, { method: 'POST', body: JSON.stringify({ description }) }),
   listChangeRequests: (milestoneId: string) => apiFetch(`/payments/milestones/${milestoneId}/change-requests`),
+  rateMilestone:      (milestoneId: string, score: number, feedback?: string) =>
+    apiFetch(`/payments/milestones/${milestoneId}/rate`, { method: 'POST', body: JSON.stringify({ score, feedback }) }),
+  getMilestoneRating: (milestoneId: string) => apiFetch(`/payments/milestones/${milestoneId}/rating`),
 
   // AI Agent Marketplace
   listAgentListings:    (category?: string) => apiFetch(`/agent-listings${category ? `?category=${category}` : ''}`),

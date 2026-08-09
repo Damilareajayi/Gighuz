@@ -7,7 +7,7 @@ import { createMilestoneEscrow } from '../services/stripe';
 import { routePayout } from '../services/payouts';
 import { resolvePayoutTarget } from '../services/payoutTarget';
 import { invokeAgent } from '../services/agentInvoker';
-import { MilestoneInstance, Job, ChangeRequest, AgentListing, Submission } from '../types';
+import { MilestoneInstance, Job, ChangeRequest, AgentListing, Submission, Rating } from '../types';
 import { runCommsAgent } from '../agents/commsAgent';
 import { runScopeGuardAgent } from '../agents/scopeGuardAgent';
 import { runDeliverableAuditor } from '../agents/deliverableAuditor';
@@ -25,6 +25,11 @@ const CreateMilestoneSchema = z.object({
 
 const ChangeRequestSchema = z.object({
   description: z.string().min(10).max(2000),
+});
+
+const RatingSchema = z.object({
+  score: z.number().int().min(1).max(5),
+  feedback: z.string().max(1000).optional(),
 });
 
 /**
@@ -287,6 +292,93 @@ router.get('/milestones/:id/change-requests', requireAuth(), async (req: AuthReq
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
   } catch {
     return res.status(500).json({ success: false, error: 'Failed to fetch change requests' });
+  }
+});
+
+// POST /payments/milestones/:id/rate — recruiter rates the completed work
+// (human or AI agent) after payment has already released. This never
+// affects the payment itself — it's a reputation signal for future
+// matching/browsing, not a claw-back mechanism. See ARCHITECTURE.md for why.
+router.post('/milestones/:id/rate', requireAuth(['recruiter']), async (req: AuthRequest, res: Response) => {
+  try {
+    const { score, feedback } = RatingSchema.parse(req.body);
+
+    const milestoneDoc = await db().collection('milestones').doc(req.params.id).get();
+    if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    const milestone = milestoneDoc.data() as MilestoneInstance;
+    if (milestone.recruiterId !== req.profileId) {
+      return res.status(403).json({ success: false, error: 'Not your milestone' });
+    }
+    if (milestone.status !== 'paid') {
+      return res.status(400).json({ success: false, error: 'Only paid milestones can be rated' });
+    }
+
+    const existing = await db().collection('ratings').where('milestoneId', '==', req.params.id).limit(1).get();
+    if (!existing.empty) {
+      return res.status(409).json({ success: false, error: 'This milestone has already been rated' });
+    }
+
+    const rating: Rating = {
+      id: uuidv4(),
+      milestoneId: milestone.id,
+      jobId: milestone.jobId,
+      recruiterId: milestone.recruiterId,
+      workerType: milestone.workerType,
+      ...(milestone.freelancerId ? { freelancerId: milestone.freelancerId } : {}),
+      ...(milestone.agentListingId ? { agentListingId: milestone.agentListingId } : {}),
+      ...(milestone.developerId ? { developerId: milestone.developerId } : {}),
+      score,
+      ...(feedback ? { feedback } : {}),
+      createdAt: new Date().toISOString(),
+    };
+
+    await db().collection('ratings').doc(rating.id).set(rating);
+
+    // Update the worker's running average — a freelancer's rating lives on
+    // their profile, but an agent's rating lives on the specific listing,
+    // since one developer's different agents can vary wildly in quality.
+    const targetCollection = milestone.workerType === 'agent' ? 'agentListings' : 'freelancers';
+    const targetId = milestone.workerType === 'agent' ? milestone.agentListingId : milestone.freelancerId;
+
+    if (targetId) {
+      const targetRef = db().collection(targetCollection).doc(targetId);
+      const targetData = (await targetRef.get()).data() as { averageRating?: number; ratingCount?: number } | undefined;
+      const oldCount = targetData?.ratingCount || 0;
+      const oldAverage = targetData?.averageRating || 0;
+      const newCount = oldCount + 1;
+      const newAverage = Math.round(((oldAverage * oldCount + score) / newCount) * 10) / 10;
+
+      await targetRef.update({
+        averageRating: newAverage,
+        ratingCount: newCount,
+        ...(targetCollection === 'agentListings' ? { updatedAt: new Date().toISOString() } : {}),
+      });
+    }
+
+    return res.status(201).json({ success: true, data: rating });
+  } catch (err: any) {
+    if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    return res.status(500).json({ success: false, error: err.message || 'Failed to submit rating' });
+  }
+});
+
+// GET /payments/milestones/:id/rating — fetch the rating for a milestone, if any
+router.get('/milestones/:id/rating', requireAuth(), async (req: AuthRequest, res: Response) => {
+  try {
+    const milestoneDoc = await db().collection('milestones').doc(req.params.id).get();
+    if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    const milestone = milestoneDoc.data() as MilestoneInstance;
+    const isParticipant = milestone.recruiterId === req.profileId
+      || milestone.freelancerId === req.profileId
+      || milestone.developerId === req.profileId;
+    if (!isParticipant) return res.status(403).json({ success: false, error: 'Not your milestone' });
+
+    const snap = await db().collection('ratings').where('milestoneId', '==', req.params.id).limit(1).get();
+    return res.json({ success: true, data: snap.empty ? null : snap.docs[0].data() });
+  } catch {
+    return res.status(500).json({ success: false, error: 'Failed to fetch rating' });
   }
 });
 

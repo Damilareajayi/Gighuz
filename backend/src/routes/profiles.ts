@@ -89,6 +89,7 @@ router.post('/freelancer', async (req: AuthRequest, res: Response) => {
       totalEarnings: 0,
       completedJobs: 0,
       averageRating: 0,
+      ratingCount: 0,
       createdAt: now,
     };
 

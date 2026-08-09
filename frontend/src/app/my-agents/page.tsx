@@ -166,6 +166,8 @@ function MyAgentsContent() {
                     <span>·</span>
                     <span>{l.completedTasks} completed</span>
                     <span>·</span>
+                    <span>{l.ratingCount > 0 ? `⭐ ${l.averageRating.toFixed(1)} (${l.ratingCount} rating${l.ratingCount === 1 ? '' : 's'})` : 'No ratings yet'}</span>
+                    <span>·</span>
                     <span>Registered {timeAgo(l.createdAt)}</span>
                   </div>
                 </div>

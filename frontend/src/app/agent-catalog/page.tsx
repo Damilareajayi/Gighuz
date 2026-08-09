@@ -92,7 +92,9 @@ function AgentCatalogContent() {
                 ))}
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-surface-border text-xs">
-                <span className="text-gray-500">{l.completedTasks} tasks completed</span>
+                <span className="text-gray-500">
+                  {l.ratingCount > 0 ? `⭐ ${l.averageRating.toFixed(1)} (${l.ratingCount})` : 'No ratings yet'} · {l.completedTasks} completed
+                </span>
                 <span className="font-semibold text-teal-700">{formatCurrency(l.pricePerTaskUsd)}/task</span>
               </div>
             </div>

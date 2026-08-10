@@ -59,6 +59,7 @@ router.post('/', requireAuth(['recruiter']), async (req: AuthRequest, res: Respo
     return res.status(201).json({ success: true, data: { jobId, status: 'pending_structure' } });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    console.error('[jobs] post failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to post job' });
   }
 });
@@ -79,7 +80,8 @@ router.get('/', requireAuth(), async (req: AuthRequest, res: Response) => {
     const jobs = snap.docs.map((d) => d.data());
 
     return res.json({ success: true, data: jobs });
-  } catch {
+  } catch (err) {
+    console.error('[jobs] list failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch jobs' });
   }
 });
@@ -90,7 +92,8 @@ router.get('/:id', requireAuth(), async (req: AuthRequest, res: Response) => {
     const doc = await db().collection('jobs').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ success: false, error: 'Job not found' });
     return res.json({ success: true, data: doc.data() });
-  } catch {
+  } catch (err) {
+    console.error('[jobs] get failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch job' });
   }
 });

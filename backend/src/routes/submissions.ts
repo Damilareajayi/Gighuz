@@ -104,7 +104,8 @@ router.get('/', requireAuth(), async (req: AuthRequest, res: Response) => {
       .get();
 
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[submissions] list failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch submissions' });
   }
 });
@@ -115,7 +116,8 @@ router.get('/:id', requireAuth(), async (req: AuthRequest, res: Response) => {
     const doc = await db().collection('submissions').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ success: false, error: 'Submission not found' });
     return res.json({ success: true, data: doc.data() });
-  } catch {
+  } catch (err) {
+    console.error('[submissions] get failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch submission' });
   }
 });

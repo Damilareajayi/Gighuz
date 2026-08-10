@@ -59,7 +59,8 @@ router.get('/', requireAuth(['recruiter']), async (req: AuthRequest, res: Respon
 
     const snap = await query.limit(50).get();
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[agentListings] catalog fetch failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch agent listings' });
   }
 });
@@ -72,7 +73,8 @@ router.get('/mine', requireAuth(['agent_developer']), async (req: AuthRequest, r
       .orderBy('createdAt', 'desc')
       .get();
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[agentListings] mine fetch failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch your agent listings' });
   }
 });
@@ -97,7 +99,8 @@ router.patch('/:id', requireAuth(['agent_developer']), async (req: AuthRequest, 
 
     await db().collection('agentListings').doc(req.params.id).update(updates);
     return res.json({ success: true, message: 'Listing updated' });
-  } catch {
+  } catch (err) {
+    console.error('[agentListings] update failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to update listing' });
   }
 });

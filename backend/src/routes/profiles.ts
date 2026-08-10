@@ -170,7 +170,8 @@ router.get('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
     const collection = collectionForRole(req.role);
     const doc = await db().collection(collection).doc(req.profileId!).get();
     return res.json({ success: true, data: doc.data() });
-  } catch {
+  } catch (err) {
+    console.error('[profiles] fetch me failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch profile' });
   }
 });
@@ -193,7 +194,8 @@ router.patch('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
 
     await db().collection(collection).doc(req.profileId!).update(updates);
     return res.json({ success: true, message: 'Profile updated' });
-  } catch {
+  } catch (err) {
+    console.error('[profiles] update me failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to update profile' });
   }
 });
@@ -292,7 +294,8 @@ router.get('/me/case-studies', requireAuth(['freelancer']), async (req: AuthRequ
     const snap = await db().collection('freelancers').doc(req.profileId!)
       .collection('caseStudies').orderBy('createdAt', 'desc').limit(20).get();
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[profiles] fetch case studies failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch case studies' });
   }
 });
@@ -319,7 +322,8 @@ router.get('/freelancers', requireAuth(['recruiter']), async (req: AuthRequest, 
     }
 
     return res.json({ success: true, data: profiles });
-  } catch {
+  } catch (err) {
+    console.error('[profiles] fetch freelancers failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch freelancers' });
   }
 });

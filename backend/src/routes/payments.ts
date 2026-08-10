@@ -290,7 +290,8 @@ router.get('/milestones/:id/change-requests', requireAuth(), async (req: AuthReq
       .get();
 
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[payments] list change requests failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch change requests' });
   }
 });
@@ -377,7 +378,8 @@ router.get('/milestones/:id/rating', requireAuth(), async (req: AuthRequest, res
 
     const snap = await db().collection('ratings').where('milestoneId', '==', req.params.id).limit(1).get();
     return res.json({ success: true, data: snap.empty ? null : snap.docs[0].data() });
-  } catch {
+  } catch (err) {
+    console.error('[payments] fetch rating failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch rating' });
   }
 });
@@ -397,7 +399,8 @@ router.get('/milestones', requireAuth(), async (req: AuthRequest, res: Response)
       .get();
 
     return res.json({ success: true, data: snap.docs.map((d) => d.data()) });
-  } catch {
+  } catch (err) {
+    console.error('[payments] list milestones failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to fetch milestones' });
   }
 });

@@ -11,8 +11,8 @@
 
 @layer components {
   /* Cards */
-  .card { @apply bg-white border border-surface-border rounded-xl p-5 shadow-sm; }
-  .card-hover { @apply card hover:border-teal-700/30 hover:shadow-md transition-all duration-200; }
+  .card { @apply bg-white border border-surface-border rounded-2xl p-5 shadow-sm; }
+  .card-hover { @apply card hover:border-teal-700/30 hover:shadow-md active:scale-[0.99] transition-all duration-200; }
 
   /* Badges */
   .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium; }
@@ -22,14 +22,15 @@
   .badge-green  { @apply badge bg-green-50 text-green-700; }
   .badge-red    { @apply badge bg-red-50 text-red-600; }
 
-  /* Buttons */
-  .btn-primary  { @apply bg-teal-700 text-white font-semibold px-4 py-2.5 rounded-lg hover:bg-teal-800 transition-colors text-sm disabled:opacity-40; }
-  .btn-orange   { @apply bg-orange-600 text-white font-semibold px-4 py-2.5 rounded-lg hover:bg-orange-700 transition-colors text-sm disabled:opacity-40; }
-  .btn-outline  { @apply border border-surface-border text-gray-600 font-medium px-4 py-2.5 rounded-lg hover:bg-surface-alt transition-colors text-sm; }
-  .btn-ghost    { @apply text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-3 py-2 rounded-lg transition-colors text-sm; }
+  /* Buttons — generous touch targets and a tactile press state, since this
+     ships as a real mobile app via Capacitor, not just a responsive site. */
+  .btn-primary  { @apply bg-teal-700 text-white font-semibold px-5 py-3 rounded-xl hover:bg-teal-800 active:scale-[0.97] transition-all text-sm disabled:opacity-40 disabled:active:scale-100; }
+  .btn-orange   { @apply bg-orange-600 text-white font-semibold px-5 py-3 rounded-xl hover:bg-orange-700 active:scale-[0.97] transition-all text-sm disabled:opacity-40 disabled:active:scale-100; }
+  .btn-outline  { @apply border border-surface-border text-gray-600 font-medium px-5 py-3 rounded-xl hover:bg-surface-alt active:scale-[0.97] transition-all text-sm; }
+  .btn-ghost    { @apply text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-3 py-2.5 rounded-xl transition-colors text-sm; }
 
   /* Nav */
-  .nav-link     { @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors cursor-pointer; }
+  .nav-link     { @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-teal-700 hover:bg-teal-50 transition-colors cursor-pointer; }
   .nav-link.active { @apply text-teal-700 bg-teal-50; }
 
   /* Split brand text */

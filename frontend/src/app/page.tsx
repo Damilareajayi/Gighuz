@@ -1,57 +1,57 @@
 import Link from 'next/link';
-import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight, CheckCircle2, Users, FileCheck, ShieldAlert, BadgeCheck, Sparkles, X, Check } from 'lucide-react';
+import { Briefcase, ShieldCheck, Wallet, Zap, ArrowRight, CheckCircle2, Users, Bot, ShieldAlert, Star, Sparkles, X, Check } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
 
 const comparisonRows = [
-  { theirs: 'Trust built on reviews — lagging, gameable, useless for your first hire', ours: 'Trust enforced up front: AI audits every deliverable before you ever see it' },
+  { theirs: 'Trust built on reviews — lagging, gameable, useless for your first task', ours: 'Trust enforced up front: AI audits every deliverable before you ever see it' },
   { theirs: 'Scope creep is an argument you have to win yourself', ours: 'Scope Guard Agent rules on every change request — free revision or new paid work, decided instantly' },
-  { theirs: 'Skills are just self-reported tags', ours: 'Skill Verification Agent checks portfolio evidence against every claimed skill' },
-  { theirs: 'Your portfolio is whatever you remember to update', ours: 'Case Study Agent writes your portfolio for you, automatically, every time you get paid' },
-  { theirs: 'AI-generated work has nowhere trustworthy to sell it', ours: 'Third-party AI agents get audited and escrow-paid exactly like human freelancers' },
+  { theirs: 'No way to tell a good agent from a bad one before you pay', ours: 'Every agent carries a real rating, built from audited, paid work — not self-reported claims' },
+  { theirs: 'AI-generated work has nowhere trustworthy to sell it', ours: 'Any developer can list an agent, get matched to real work, and get escrow-paid the moment it passes audit' },
+  { theirs: 'You pay up front and hope for the best', ours: 'Your card is only ever charged after the work passes — never before' },
 ];
 
 const beyondFeatures = [
   {
     icon: ShieldAlert,
     title: 'Scope Guard Agent',
-    description: 'When a client asks for "just one small change," this agent rules whether it\'s covered by the original milestone or deserves its own payment — before you do the work for free.',
+    description: 'When you ask for "just one small change," this agent rules whether it\'s covered by the original task or deserves its own payment — decided instantly, not argued over.',
   },
   {
-    icon: BadgeCheck,
-    title: 'Skill Verification Agent',
-    description: 'Portfolio links get checked against claimed skills automatically, so "React expert" means something more than a tag someone typed in.',
+    icon: Star,
+    title: 'Agent Ratings',
+    description: 'Rate every agent\'s work after you\'ve seen it and paid for it. Ratings build a real track record over time — not a badge an agent gave itself.',
   },
   {
     icon: Sparkles,
-    title: 'Case Study Agent',
-    description: 'Every paid, audit-passed milestone becomes a polished case study on your profile automatically — your portfolio builds itself as you work.',
+    title: 'Deliverable Auditor',
+    description: 'Every submission — code, copy, a design brief, a full report — gets checked against your stated acceptance criteria before you ever see it.',
   },
 ];
 
-const recruiterPoints = [
-  'AI structures your job post into clear, priced milestones in seconds',
-  'Get matched with vetted freelancers ranked by skill fit and track record',
+const clientPoints = [
+  'AI structures your task into clear, priced milestones in seconds',
+  'Get matched with the right agent for the job, ranked by rating and track record',
   'Every deliverable is audited against your criteria before you see it',
-  'Funds sit in escrow until work passes — you never pay for nothing',
+  'Your card is only charged once the work passes — never before',
 ];
 
-const freelancerPoints = [
-  'Every job you’re matched to is already funded in escrow',
-  'Get AI feedback on your submission before the client sees a rough draft',
-  'Get paid the moment your work passes — straight to your bank or mobile money',
-  'Build a profile with an AI-generated resume from your skills and track record',
+const developerPoints = [
+  'List an agent for free — no listing fee, ever',
+  'Get matched to real, escrow-funded tasks automatically',
+  'Get paid the moment your agent\'s work passes audit',
+  'Build a public rating and track record as you complete tasks',
 ];
 
 const steps = [
   {
     icon: Briefcase,
-    title: 'Post a job',
+    title: 'Post a task',
     description: 'Describe what you need in plain language. The Structuring Agent turns it into clear, priced milestones.',
   },
   {
     icon: Zap,
-    title: 'Get matched',
-    description: 'The Matching Agent ranks vetted freelancers by skill fit, rating, and track record — instantly.',
+    title: 'Get matched to an agent',
+    description: 'The Matching Agent ranks agents from the catalog by fit, rating, and track record — instantly.',
   },
   {
     icon: ShieldCheck,
@@ -60,8 +60,8 @@ const steps = [
   },
   {
     icon: Wallet,
-    title: 'Payment releases automatically',
-    description: 'Funds sit in escrow until work passes audit, then payout routes instantly via Paystack or Flutterwave.',
+    title: 'You pay only if satisfied',
+    description: 'Your card is authorized but never charged until the work passes audit — then payout routes instantly.',
   },
 ];
 
@@ -88,20 +88,19 @@ export default function LandingPage() {
           AI agents get it done — you only pay when you're satisfied
         </span>
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-          The borderless engine <br className="hidden md:block" /> for global work
+          Hire AI agents <br className="hidden md:block" /> to get your work done
         </h1>
         <p className="mt-5 text-base md:text-lg text-gray-500 max-w-2xl mx-auto">
-          GigHuz connects clients with vetted freelance talent — human or AI —
-          anywhere in the world. Post a task, get matched to a person or an
-          agent, and every deliverable is audited before you pay for it.
-          Quality is guaranteed on both sides, whoever does the work.
+          GigHuz matches you with the right AI agent for the task — branding,
+          code, presentations, data reports, and more — then audits the work
+          before you ever see it. Check the output, and only pay if you're satisfied.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link href="/login?mode=signup&role=recruiter" className="btn-primary flex items-center gap-2 px-6 py-3 text-base">
-            Hire Talent <ArrowRight size={16} />
+            Hire an Agent <ArrowRight size={16} />
           </Link>
-          <Link href="/login?mode=signup&role=freelancer" className="btn-outline flex items-center gap-2 px-6 py-3 text-base">
-            Find Work <ArrowRight size={16} />
+          <Link href="/login?mode=signup&role=agent_developer" className="btn-outline flex items-center gap-2 px-6 py-3 text-base">
+            List Your Agent <ArrowRight size={16} />
           </Link>
         </div>
         <p className="mt-4 text-xs text-gray-400">
@@ -190,19 +189,19 @@ export default function LandingPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
-          {/* Hire Talent — teal */}
+          {/* Hire an Agent — teal */}
           <div className="rounded-2xl bg-teal-700 text-white p-8 md:p-10 flex flex-col shadow-sm">
             <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-6">
               <Users size={22} />
             </div>
             <span className="text-xs font-semibold uppercase tracking-widest text-teal-200 mb-2">For Clients</span>
-            <h3 className="text-3xl font-bold mb-3">Hire Talent</h3>
+            <h3 className="text-3xl font-bold mb-3">Hire an Agent</h3>
             <p className="text-teal-100 text-sm leading-relaxed mb-7">
-              Post a job, not a job-description novel. Describe what you need and
-              let AI handle the scoping, matching, and quality control.
+              Post a task, not a job-description novel. Describe what you need and
+              let AI handle the matching, execution, and quality control.
             </p>
             <ul className="space-y-3 mb-8 flex-1">
-              {recruiterPoints.map((point) => (
+              {clientPoints.map((point) => (
                 <li key={point} className="flex items-start gap-2.5 text-sm text-teal-50">
                   <CheckCircle2 size={16} className="text-teal-200 shrink-0 mt-0.5" />
                   <span>{point}</span>
@@ -210,54 +209,35 @@ export default function LandingPage() {
               ))}
             </ul>
             <Link href="/login?mode=signup&role=recruiter"
-              className="bg-white text-teal-700 font-semibold px-6 py-3.5 rounded-lg hover:bg-teal-50 transition-colors inline-flex items-center justify-center gap-2 text-base">
-              Post a Job <ArrowRight size={16} />
+              className="bg-white text-teal-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-teal-50 active:scale-[0.97] transition-all inline-flex items-center justify-center gap-2 text-base">
+              Post a Task <ArrowRight size={16} />
             </Link>
           </div>
 
-          {/* Find Work — orange */}
+          {/* List Your Agent — orange */}
           <div className="rounded-2xl bg-orange-600 text-white p-8 md:p-10 flex flex-col shadow-sm">
             <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center mb-6">
-              <FileCheck size={22} />
+              <Bot size={22} />
             </div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-orange-100 mb-2">For Freelancers</span>
-            <h3 className="text-3xl font-bold mb-3">Find Work</h3>
+            <span className="text-xs font-semibold uppercase tracking-widest text-orange-100 mb-2">For AI Agent Developers</span>
+            <h3 className="text-3xl font-bold mb-3">List Your Agent</h3>
             <p className="text-orange-50 text-sm leading-relaxed mb-7">
-              Get matched to real, funded work — no chasing invoices, no
-              scope creep, no wondering if a client will actually pay.
+              Built an AI agent? Register its endpoint and get matched to real,
+              escrow-funded tasks — free to list, no fee until you're paid.
             </p>
             <ul className="space-y-3 mb-8 flex-1">
-              {freelancerPoints.map((point) => (
+              {developerPoints.map((point) => (
                 <li key={point} className="flex items-start gap-2.5 text-sm text-orange-50">
                   <CheckCircle2 size={16} className="text-orange-100 shrink-0 mt-0.5" />
                   <span>{point}</span>
                 </li>
               ))}
             </ul>
-            <Link href="/login?mode=signup&role=freelancer"
-              className="bg-white text-orange-600 font-semibold px-6 py-3.5 rounded-lg hover:bg-orange-50 transition-colors inline-flex items-center justify-center gap-2 text-base">
-              Find Work <ArrowRight size={16} />
+            <Link href="/login?mode=signup&role=agent_developer"
+              className="bg-white text-orange-600 font-semibold px-6 py-3.5 rounded-xl hover:bg-orange-50 active:scale-[0.97] transition-all inline-flex items-center justify-center gap-2 text-base">
+              List Your Agent <ArrowRight size={16} />
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Third audience — agent developers, styled distinctly from the two primary panels */}
-      <section className="max-w-5xl mx-auto px-6 pb-16">
-        <div className="rounded-2xl border-2 border-dashed border-surface-border p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 block">For AI Agent Developers</span>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Built an AI agent? List it — free</h3>
-            <p className="text-sm text-gray-500 max-w-xl">
-              Register your agent's endpoint, set a price per task, and get matched to real,
-              escrow-funded work. No listing fee — you're only paid when a task you complete
-              passes the same audit gate every human submission goes through.
-            </p>
-          </div>
-          <Link href="/login?mode=signup&role=agent_developer"
-            className="btn-outline flex items-center gap-2 px-6 py-3 text-sm whitespace-nowrap">
-            List Your Agent <ArrowRight size={16} />
-          </Link>
         </div>
       </section>
 

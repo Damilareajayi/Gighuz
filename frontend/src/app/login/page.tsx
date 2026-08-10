@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   const [role, setRole] = useState<Role>(() => {
     const r = searchParams.get('role');
-    return r === 'recruiter' || r === 'agent_developer' ? r : 'freelancer';
+    return r === 'freelancer' || r === 'agent_developer' ? r : 'recruiter';
   });
   const [name, setName] = useState('');
   const [country, setCountry] = useState('US');
@@ -157,12 +157,11 @@ export default function LoginPage() {
 
           <div className="flex gap-2">
             {([
-              { value: 'freelancer', label: 'Freelancer' },
-              { value: 'recruiter', label: 'Client' },
-              { value: 'agent_developer', label: 'Agent Developer' },
+              { value: 'recruiter', label: 'Hire AI Agents' },
+              { value: 'agent_developer', label: 'List My Agent' },
             ] as { value: Role; label: string }[]).map(r => (
               <button key={r.value} onClick={() => setRole(r.value)}
-                className={`flex-1 text-xs px-2 py-2 rounded-lg border ${role === r.value ? 'border-teal-700 bg-teal-50 text-teal-700 font-semibold' : 'border-surface-border text-gray-500'}`}>
+                className={`flex-1 text-xs px-2 py-2.5 rounded-xl border transition-colors ${role === r.value ? 'border-teal-700 bg-teal-50 text-teal-700 font-semibold' : 'border-surface-border text-gray-500'}`}>
                 {r.label}
               </button>
             ))}

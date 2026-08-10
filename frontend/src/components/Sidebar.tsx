@@ -6,10 +6,13 @@ import { LogoMark } from './Logo';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth';
 
+// Talent Pool (human freelancers) is deliberately left out of primary nav —
+// GigHuz now leads entirely with hiring AI agents. The route and backend
+// still work for existing freelancer accounts; it's de-emphasized, not
+// removed.
 const recruiterNav = [
   { href: '/dashboard',     label: 'Dashboard',     icon: LayoutDashboard },
   { href: '/jobs',          label: 'My Jobs',        icon: Briefcase },
-  { href: '/talent',        label: 'Talent Pool',    icon: Users },
   { href: '/agent-catalog', label: 'Agent Catalog',  icon: Bot },
   { href: '/payments',      label: 'Payments',       icon: CreditCard },
 ];
@@ -127,17 +130,22 @@ export function Sidebar({ role = 'recruiter' }: { role?: SidebarRole }) {
       </header>
 
       {/* Mobile bottom tab bar */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-surface-border z-20 flex items-stretch pb-[env(safe-area-inset-bottom)]">
-        {allNav.map(({ href, label, icon: Icon }) => (
-          <Link key={href} href={href}
-            className={cn(
-              'flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium min-w-0',
-              path === href ? 'text-teal-700' : 'text-gray-400'
-            )}>
-            <Icon size={18} />
-            <span className="truncate w-full text-center px-0.5">{label}</span>
-          </Link>
-        ))}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-surface-border z-20 flex items-stretch px-2 pt-1.5 pb-[calc(env(safe-area-inset-bottom)+0.375rem)]">
+        {allNav.map(({ href, label, icon: Icon }) => {
+          const active = path === href;
+          return (
+            <Link key={href} href={href}
+              className="flex-1 flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium min-w-0 active:scale-95 transition-transform">
+              <span className={cn(
+                'flex items-center justify-center w-9 h-7 rounded-full transition-colors',
+                active ? 'bg-teal-100 text-teal-700' : 'text-gray-400'
+              )}>
+                <Icon size={18} />
+              </span>
+              <span className={cn('truncate w-full text-center px-0.5', active ? 'text-teal-700' : 'text-gray-400')}>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </>
   );

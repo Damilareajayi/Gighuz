@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
-import { publishEvent } from '../services/pubsub';
 import { runDeliverableAuditor } from '../agents/deliverableAuditor';
 import { Submission, MilestoneInstance } from '../types';
 
@@ -64,15 +63,11 @@ router.post('/', requireAuth(['freelancer']), async (req: AuthRequest, res: Resp
       updatedAt: now,
     });
 
-    // Publish for any future async consumer -- there's no Pub/Sub subscriber
-    // deployed yet, so this alone doesn't run anything. The actual audit
-    // happens right here, fire-and-forget.
-    await publishEvent('submission.received', {
-      submissionId,
-      milestoneId: data.milestoneId,
-      freelancerId: req.profileId,
-    });
-
+    // Fire-and-forget -- doesn't block the response. (Previously also
+    // published to Pub/Sub here as a hook for a future async consumer, but
+    // with no subscriber ever deployed, awaiting that call just added
+    // several seconds of internal SDK retries against a topic that doesn't
+    // exist to every submission, for no benefit.)
     runDeliverableAuditor({ submission, milestone }).catch(
       (err) => console.error('[Submissions] Auditor error:', err)
     );

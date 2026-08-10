@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
-import { publishEvent } from '../services/pubsub';
 import { runStructuringAgent } from '../agents/structuringAgent';
 import { runMatchingAgent } from '../agents/matchingAgent';
 import { Job } from '../types';
@@ -46,11 +45,11 @@ router.post('/', requireAuth(['recruiter']), async (req: AuthRequest, res: Respo
 
     await db().collection('jobs').doc(jobId).set(job);
 
-    // Publish for any future async consumer (analytics, etc.) -- there's no
-    // Pub/Sub subscriber deployed yet, so this alone doesn't run anything.
-    // The actual structuring happens right here, fire-and-forget.
-    await publishEvent('job.posted', { jobId, recruiterId: req.profileId });
-
+    // Fire-and-forget -- doesn't block the response. (Previously also
+    // published to Pub/Sub here as a hook for a future async consumer, but
+    // with no subscriber ever deployed, awaiting that call just added
+    // several seconds of internal SDK retries against a topic that doesn't
+    // exist to every job post, for no benefit.)
     runStructuringAgent({ jobId, recruiterId: req.profileId!, descriptionRaw }).catch(
       (err) => console.error('[Jobs] Structuring agent error:', err)
     );

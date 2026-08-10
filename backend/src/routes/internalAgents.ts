@@ -7,6 +7,19 @@ import {
   runPortfolioSiteAgent,
   runDataAnalysisAgent,
   runSeoContentAgent,
+  runAppDeveloperAgent,
+  runPowerBiTrainerAgent,
+  runExcelFormulaAgent,
+  runDataCleanerAgent,
+  runTranscriptCleanerAgent,
+  runTranscriptGeneratorAgent,
+  runTranslatorAgent,
+  runLegalSummarizerAgent,
+  runResumeWriterAgent,
+  runSocialMediaAgent,
+  runEmailCopywriterAgent,
+  runBusinessPlanAgent,
+  AgentRunResult,
 } from '../agents/marketplaceAgents';
 import { AgentInvocationRequest } from '../types';
 
@@ -35,14 +48,15 @@ const InvocationSchema = z.object({
   acceptanceCriteria: z.array(z.string()),
 });
 
-function agentEndpoint(run: (req: AgentInvocationRequest) => Promise<string>) {
+function agentEndpoint(run: (req: AgentInvocationRequest) => Promise<AgentRunResult>) {
   return async (req: Request, res: Response) => {
     try {
       const data = InvocationSchema.parse(req.body);
-      const output = await run(data);
-      return res.json({ success: true, output, outputUrls: [] });
+      const { output, outputUrls } = await run(data);
+      return res.json({ success: true, output, outputUrls });
     } catch (err: any) {
       if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+      console.error('[internalAgents] invocation failed:', err);
       return res.status(500).json({ success: false, error: 'Agent invocation failed' });
     }
   };
@@ -54,5 +68,17 @@ router.post('/presentation', agentEndpoint(runPresentationAgent));
 router.post('/portfolio-site', agentEndpoint(runPortfolioSiteAgent));
 router.post('/data-analysis', agentEndpoint(runDataAnalysisAgent));
 router.post('/seo-content', agentEndpoint(runSeoContentAgent));
+router.post('/app-developer', agentEndpoint(runAppDeveloperAgent));
+router.post('/powerbi-trainer', agentEndpoint(runPowerBiTrainerAgent));
+router.post('/excel-formatter', agentEndpoint(runExcelFormulaAgent));
+router.post('/data-cleaner', agentEndpoint(runDataCleanerAgent));
+router.post('/transcript-cleaner', agentEndpoint(runTranscriptCleanerAgent));
+router.post('/transcript-generator', agentEndpoint(runTranscriptGeneratorAgent));
+router.post('/translator', agentEndpoint(runTranslatorAgent));
+router.post('/legal-summarizer', agentEndpoint(runLegalSummarizerAgent));
+router.post('/resume-writer', agentEndpoint(runResumeWriterAgent));
+router.post('/social-media', agentEndpoint(runSocialMediaAgent));
+router.post('/email-copywriter', agentEndpoint(runEmailCopywriterAgent));
+router.post('/business-plan', agentEndpoint(runBusinessPlanAgent));
 
 export default router;

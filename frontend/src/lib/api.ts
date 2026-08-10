@@ -8,32 +8,52 @@ async function getToken(): Promise<string> {
   return user.getIdToken();
 }
 
+const UNREACHABLE = "Can't reach GigHuz right now — check your connection and try again.";
+const GENERIC_FAILURE = 'Something went sideways on our end — give it another try in a moment.';
+
+async function parseApiResponse<T>(res: Response): Promise<T> {
+  let data: any;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(GENERIC_FAILURE);
+  }
+  if (!data.success) throw new Error(data.error || GENERIC_FAILURE);
+  return data.data as T;
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const token = await getToken();
-  const res = await fetch(`${API}/api${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options?.headers,
-    },
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || 'API error');
-  return data.data as T;
+  let res: Response;
+  try {
+    res = await fetch(`${API}/api${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...options?.headers,
+      },
+    });
+  } catch {
+    throw new Error(UNREACHABLE);
+  }
+  return parseApiResponse<T>(res);
 }
 
 // No Content-Type header here — the browser sets the multipart boundary itself.
 async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
   const token = await getToken();
-  const res = await fetch(`${API}/api${path}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || 'API error');
-  return data.data as T;
+  let res: Response;
+  try {
+    res = await fetch(`${API}/api${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+  } catch {
+    throw new Error(UNREACHABLE);
+  }
+  return parseApiResponse<T>(res);
 }
 
 export const api = {

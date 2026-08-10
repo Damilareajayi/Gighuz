@@ -7,6 +7,8 @@ import { LogoMark } from '@/components/Logo';
 import { useAuth, Role } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { COUNTRY_CODES, flagEmoji } from '@/lib/countryCodes';
+import { friendlyError } from '@/lib/errors';
+import { ErrorBanner } from '@/components/ErrorBanner';
 
 type Mode = 'signin' | 'signup';
 type PhoneStep = 'enter-number' | 'enter-code';
@@ -55,7 +57,7 @@ export default function LoginPage() {
       if (mode === 'signin') await signIn(email, password);
       else await signUp(email, password);
     } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') || 'Authentication failed');
+      setError(friendlyError(err, 'Could not sign you in — try again.'));
     } finally {
       setBusy(false);
     }
@@ -67,7 +69,7 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') || 'Google sign-in failed');
+      setError(friendlyError(err, 'Google sign-in didn’t go through — try again.'));
     } finally {
       setBusy(false);
     }
@@ -88,7 +90,7 @@ export default function LoginPage() {
       confirmationRef.current = await signInWithPhoneNumber(auth, fullNumber, getRecaptcha());
       setPhoneStep('enter-code');
     } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') || 'Could not send verification code');
+      setError(friendlyError(err, 'Could not send a verification code — try again.'));
     } finally {
       setBusy(false);
     }
@@ -101,7 +103,7 @@ export default function LoginPage() {
       if (!confirmationRef.current) throw new Error('Request a code first');
       await confirmationRef.current.confirm(code);
     } catch (err: any) {
-      setError(err.message?.replace('Firebase: ', '') || 'Invalid code');
+      setError(friendlyError(err, "That code didn't work — check it and try again."));
     } finally {
       setBusy(false);
     }
@@ -134,7 +136,7 @@ export default function LoginPage() {
         });
       }
     } catch (err: any) {
-      setError(err.message || 'Could not create profile');
+      setError(friendlyError(err, 'Could not create your profile — try again.'));
     } finally {
       setBusy(false);
     }
@@ -193,7 +195,7 @@ export default function LoginPage() {
             </>
           )}
 
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <ErrorBanner message={error} />}
 
           <button onClick={handleOnboarding} disabled={busy || !name || country.length !== 2} className="btn-primary w-full">
             {busy ? 'Creating profile…' : 'Continue'}
@@ -277,7 +279,7 @@ export default function LoginPage() {
           </>
         )}
 
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
 
         <p className="text-[11px] text-gray-400 text-center leading-relaxed">
           By continuing, you agree to GigHuz's{' '}

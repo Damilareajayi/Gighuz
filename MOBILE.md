@@ -60,30 +60,45 @@ npm run cap:ios              # opens the project in Xcode
 
 Then run on the simulator or a device from Xcode.
 
-## Known gap: Google Sign-In won't work as-is
+## Google Sign-In on native
 
-The current "Continue with Google" button uses Firebase's
-`signInWithPopup`, which opens an OAuth popup. **Google blocks that flow
-inside embedded/native webviews** (including Capacitor's) as a security
-policy — it'll fail with a `disallowed_useragent` error on mobile, even
-though it works fine in a real mobile browser. Email/password and
-phone/SMS sign-in aren't affected by this.
+`signInWithGoogle()` in `src/lib/auth.tsx` now branches on
+`Capacitor.isNativePlatform()`: web keeps the original `signInWithPopup`,
+native platforms use `@capacitor-firebase/authentication`'s native Google
+Sign-In flow (avoids the `disallowed_useragent` error Google throws for
+OAuth popups inside embedded webviews), then feeds the resulting ID token
+into `signInWithCredential` so `auth.currentUser` / `onAuthStateChanged`
+work identically either way — nothing else in the app had to change.
 
-Fixing it properly means swapping to a native OAuth flow on mobile (e.g.
-`@capacitor-firebase/authentication`, or Capacitor's Browser plugin with a
-custom URL scheme redirect back into the app) — real, scoped follow-up
-work, not a config tweak.
+This needed a real (non-emulator) Firebase project, which now exists:
+- `android/app/google-services.json` and `ios/App/App/GoogleService-Info.plist`
+  are both real, downloaded from Firebase's Android/iOS app registrations
+  on the `gighuz-app` project (both apps registered under `com.gighuz.app`).
+- `ios/App/App/Info.plist` has the `REVERSED_CLIENT_ID` URL scheme Google
+  Sign-In needs to call back into the app.
+- The **debug** signing keystore's SHA-1/SHA-256 fingerprints are
+  registered with the Firebase Android app — Google Sign-In checks the
+  signing cert against what's registered, so this only covers debug
+  builds signed with `~/.android/debug.keystore`.
+
+**Before a release build**: generate (or locate) your actual release
+signing keystore, get its SHA-1/SHA-256 (`keytool -list -v -keystore
+your-release.keystore -alias your-alias`), and add it as another SHA
+fingerprint on the Android app in the [Firebase console](https://console.firebase.google.com/project/gighuz-app/settings/general/) —
+Google Sign-In will fail on a release build signed with an unregistered
+key even though debug builds work fine.
 
 ## Before shipping to an app store
 
 - [x] App icon/splash screen — generated from `public/brand/gighuz-icon-512.png`
   via `@capacitor/assets` (source images kept at `frontend/resources/` for
   regenerating later with a higher-res source if you get one).
-- [ ] Point `CAPACITOR_SERVER_URL` at a real deployed HTTPS URL — an app
-  pointed at `10.0.2.2` or your laptop's LAN IP only works on your network.
-  See `DEPLOY.md`.
-- [ ] Fix Google Sign-In per above. Now unblocked once you have a real
-  Firebase project (needed for the native plugin's `google-services.json` /
-  `GoogleService-Info.plist`) — not yet done.
+- [x] Google Sign-In — see above. Debug builds only until a release
+  keystore's fingerprint is registered too.
+- [ ] Point `CAPACITOR_SERVER_URL` at the real deployed HTTPS URL
+  (`https://gighuz.vercel.app`) before syncing a release build — an app
+  pointed at `10.0.2.2` or your laptop's LAN IP only works on your network:
+  `CAPACITOR_SERVER_URL=https://gighuz.vercel.app npx cap sync`
+- [ ] Register a release signing keystore's SHA fingerprints (see above).
 - [ ] Review Apple/Google developer account requirements — separate from
   anything in this repo.

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "174251690360",
+    "project_id": "gighuz-app",
+    "storage_bucket": "gighuz-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174251690360:android:21ab10dfd8ced0fedce08d",
+        "android_client_info": {
+          "package_name": "com.gighuz.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "174251690360-chhrvei3dgdnpl13simo1s0rnmiskeli.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gighuz.app",
+            "certificate_hash": "f5185401642754fa62f83c3678e98e60c823dcf9"
+          }
+        },
+        {
+          "client_id": "174251690360-25nmaci4pamph3mcoqov34u7n8g3v42q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhurUjhniDx0DPieWRAJPvMyBpO4fEh9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "174251690360-25nmaci4pamph3mcoqov34u7n8g3v42q.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "174251690360-usvhm027eg3e6uvlfiemh3r9q18102id.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gighuz.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

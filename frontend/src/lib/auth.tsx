@@ -5,10 +5,13 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithCredential,
   GoogleAuthProvider,
   signOut,
   User,
 } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { auth } from './firebase';
 import { api } from './api';
 
@@ -76,7 +79,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signInWithGoogle() {
-    await signInWithPopup(auth, new GoogleAuthProvider());
+    // signInWithPopup opens an OAuth popup, which Google blocks inside
+    // Capacitor's embedded webview (disallowed_useragent). On native
+    // platforms, run the native Google Sign-In flow instead and hand its
+    // ID token to the JS SDK, so auth.currentUser / onAuthStateChanged
+    // stay the single source of truth either way.
+    if (Capacitor.isNativePlatform()) {
+      const result = await FirebaseAuthentication.signInWithGoogle();
+      const idToken = result.credential?.idToken;
+      if (!idToken) throw new Error('Google sign-in did not return a credential');
+      await signInWithCredential(auth, GoogleAuthProvider.credential(idToken));
+    } else {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+    }
   }
 
   async function completeOnboarding(role: Role, profileData: object) {

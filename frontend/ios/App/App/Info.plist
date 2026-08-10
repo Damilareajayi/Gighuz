@@ -66,5 +66,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- REVERSED_CLIENT_ID from GoogleService-Info.plist -- required for
+				     the native Google Sign-In flow to call back into the app. -->
+				<string>com.googleusercontent.apps.174251690360-usvhm027eg3e6uvlfiemh3r9q18102id</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

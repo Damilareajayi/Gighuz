@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { db } from '../services/firebase';
-import { createMilestoneEscrow } from '../services/stripe';
+import { createMilestoneEscrow, getEscrowStatus } from '../services/stripe';
 import { routePayout } from '../services/payouts';
 import { resolvePayoutTarget } from '../services/payoutTarget';
 import { invokeAgent } from '../services/agentInvoker';
@@ -141,32 +141,65 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
 
     await db().collection('milestones').doc(milestoneId).set(milestone);
 
-    // In principle escrow funding should complete via the Stripe webhook,
-    // but the frontend has no Stripe Elements flow to actually collect a
-    // card yet, and the webhook handler doesn't invoke the agent even when
-    // it does fire -- so this is the only reachable path today. Kick the
-    // agent off immediately; the escrow is still authorize-only until the
-    // Deliverable Auditor passes it, so nothing is paid prematurely.
-    if (agentListingId) {
-      db().collection('milestones').doc(milestoneId).update({ status: 'in_progress', updatedAt: new Date().toISOString() })
-        .then(() => runAgentMilestone({ ...milestone, status: 'in_progress' }))
-        .catch((err) => console.error('[Payments] Failed to kick off agent milestone:', err));
-    }
-
+    // Milestone stays 'pending' until the client actually confirms payment
+    // client-side with Stripe.js (stripe.confirmCardPayment(clientSecret,
+    // ...)) and calls POST /milestones/:id/confirm below -- only then is
+    // the card genuinely authorized, so only then does work (agent or
+    // human) actually start.
     return res.status(201).json({
       success: true,
       data: {
         milestoneId,
         clientSecret: escrow.clientSecret,
         amount: template.paymentAmountUsd,
-        message: agentListingId
-          ? 'Escrow created — the agent has been invoked and will be audited automatically'
-          : 'Escrow created — complete payment to activate milestone',
+        message: 'Escrow created — complete payment to activate this milestone',
       },
     });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
     return res.status(500).json({ success: false, error: 'Failed to create milestone' });
+  }
+});
+
+// POST /payments/milestones/:id/confirm — client confirms the frontend's
+// stripe.confirmCardPayment() succeeded. Re-checks the PaymentIntent's real
+// status server-side rather than trusting the client's word for it, then
+// activates the milestone (and kicks off the agent, if one is assigned).
+router.post('/milestones/:id/confirm', requireAuth(['recruiter']), async (req: AuthRequest, res: Response) => {
+  try {
+    const milestoneDoc = await db().collection('milestones').doc(req.params.id).get();
+    if (!milestoneDoc.exists) return res.status(404).json({ success: false, error: 'Milestone not found' });
+
+    const milestone = milestoneDoc.data() as MilestoneInstance;
+    if (milestone.recruiterId !== req.profileId) {
+      return res.status(403).json({ success: false, error: 'Not your milestone' });
+    }
+    if (milestone.status !== 'pending') {
+      return res.status(400).json({ success: false, error: 'This milestone isn\'t awaiting payment confirmation' });
+    }
+
+    if (milestone.stripePaymentIntentId && !milestone.stripePaymentIntentId.startsWith('sim_')) {
+      const pi = await getEscrowStatus(milestone.stripePaymentIntentId);
+      if (pi.status !== 'requires_capture' && pi.status !== 'succeeded') {
+        return res.status(400).json({ success: false, error: `Payment isn't confirmed yet (status: ${pi.status})` });
+      }
+    }
+
+    await db().collection('milestones').doc(milestone.id).update({
+      status: 'in_progress',
+      updatedAt: new Date().toISOString(),
+    });
+
+    if (milestone.agentListingId) {
+      runAgentMilestone({ ...milestone, status: 'in_progress' }).catch(
+        (err) => console.error('[Payments] Failed to kick off agent milestone:', err)
+      );
+    }
+
+    return res.json({ success: true, message: 'Payment confirmed — milestone is now active' });
+  } catch (err: any) {
+    console.error('[payments] confirm milestone failed:', err);
+    return res.status(500).json({ success: false, error: 'Failed to confirm payment' });
   }
 });
 

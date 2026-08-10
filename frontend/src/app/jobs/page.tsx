@@ -4,8 +4,10 @@ import { Plus, ChevronRight, Globe, Bot, Users, DollarSign } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { ErrorBanner } from '@/components/ErrorBanner';
+import { FundMilestoneModal } from '@/components/FundMilestoneModal';
 import { statusClass, statusLabel, formatCurrency, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
+import { friendlyError } from '@/lib/errors';
 import { Job, Freelancer, AgentListing, MilestoneInstance } from '@/lib/types';
 
 function PostJobModal({ onClose, onPosted }: { onClose: () => void; onPosted: () => void }) {
@@ -142,20 +144,23 @@ function AssignWorkerPanel({ job, onAssigned }: { job: Job; onAssigned: () => vo
 function JobCard({ job, milestones, onChanged }: { job: Job; milestones: MilestoneInstance[]; onChanged: () => void }) {
   const [showAssign, setShowAssign] = useState(false);
   const [fundingId, setFundingId] = useState<string | null>(null);
+  const [fundingError, setFundingError] = useState('');
+  const [checkout, setCheckout] = useState<{ milestoneId: string; clientSecret: string; amount: number } | null>(null);
   const isAssigned = Boolean(job.assignedFreelancerId || job.assignedAgentListingId);
   const canAssign = ['structured', 'matched'].includes(job.status) && !isAssigned;
 
   async function fundMilestone(templateId: string) {
     setFundingId(templateId);
+    setFundingError('');
     try {
-      await api.createMilestone({
+      const data = await api.createMilestone({
         jobId: job.id,
         milestoneTemplateId: templateId,
         ...(job.assignedAgentListingId ? { agentListingId: job.assignedAgentListingId } : { freelancerId: job.assignedFreelancerId }),
-      });
-      onChanged();
-    } catch {
-      // surfaced via the milestone list not updating; kept lightweight for MVP
+      }) as { milestoneId: string; clientSecret: string; amount: number };
+      setCheckout(data);
+    } catch (err: any) {
+      setFundingError(friendlyError(err, 'Could not start funding for this milestone — try again.'));
     } finally {
       setFundingId(null);
     }
@@ -233,9 +238,21 @@ function JobCard({ job, milestones, onChanged }: { job: Job; milestones: Milesto
           )}
 
           {showAssign && canAssign && <AssignWorkerPanel job={job} onAssigned={() => { setShowAssign(false); onChanged(); }} />}
+
+          {fundingError && <div className="mt-2"><ErrorBanner message={fundingError} /></div>}
         </div>
         <ChevronRight size={18} className="text-gray-300 shrink-0 mt-1" />
       </div>
+
+      {checkout && (
+        <FundMilestoneModal
+          milestoneId={checkout.milestoneId}
+          clientSecret={checkout.clientSecret}
+          amount={checkout.amount}
+          onClose={() => setCheckout(null)}
+          onFunded={onChanged}
+        />
+      )}
     </div>
   );
 }

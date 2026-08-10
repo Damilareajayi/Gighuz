@@ -91,6 +91,7 @@ export const api = {
 
   // Payments
   createMilestone: (body: object) => apiFetch('/payments/milestones', { method: 'POST', body: JSON.stringify(body) }),
+  confirmMilestone: (milestoneId: string) => apiFetch(`/payments/milestones/${milestoneId}/confirm`, { method: 'POST' }),
   listMilestones:  ()             => apiFetch('/payments/milestones'),
   requestChange:      (milestoneId: string, description: string) =>
     apiFetch(`/payments/milestones/${milestoneId}/change-requests`, { method: 'POST', body: JSON.stringify({ description }) }),

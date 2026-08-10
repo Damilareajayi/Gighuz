@@ -47,7 +47,7 @@ function DashboardContent() {
   return (
     <div className="flex min-h-screen">
       <Sidebar role="recruiter" />
-      <main className="ml-56 flex-1 p-6 space-y-6">
+      <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Client Dashboard</h1>
@@ -58,7 +58,7 @@ function DashboardContent() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard label="Active Jobs" value={String(activeJobs)} sub={`${jobs.length} total posted`} icon={Briefcase} accent="teal" />
           <StatCard label="Total Budget" value={formatCurrency(totalBudget)} sub="Across all open jobs" icon={DollarSign} accent="teal" />
           <StatCard label="Candidates Matched" value={String(matchedCount)} sub="By the Matching Agent" icon={Users} accent="orange" />
@@ -69,7 +69,7 @@ function DashboardContent() {
             <Zap size={15} className="text-teal-700" />
             <p className="text-sm font-semibold text-teal-700">How your AI agents work</p>
           </div>
-          <div className="grid grid-cols-4 gap-3 text-xs text-gray-600">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-gray-600">
             <div className="bg-white rounded-lg p-3 border border-teal-100">
               <p className="font-medium text-gray-700 mb-1">Structuring Agent</p>
               Turns your raw job post into clear, priced milestones.

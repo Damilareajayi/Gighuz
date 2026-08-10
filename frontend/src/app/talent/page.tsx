@@ -29,7 +29,7 @@ function TalentContent() {
   return (
     <div className="flex min-h-screen">
       <Sidebar role="recruiter" />
-      <main className="ml-56 flex-1 p-6 space-y-6">
+      <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Talent Pool</h1>
@@ -50,7 +50,7 @@ function TalentContent() {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(f => (
             <div key={f.id} className="card-hover animate-fade-in">
               <div className="flex items-center gap-3 mb-4">

@@ -220,7 +220,7 @@ function PaymentsContent() {
   return (
     <div className="flex min-h-screen">
       <Sidebar role={sidebarRole} />
-      <main className="ml-56 flex-1 p-6 space-y-6">
+      <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
 
         <div>
           <h1 className="text-xl font-bold text-gray-900">Payments</h1>
@@ -260,7 +260,7 @@ function PaymentsContent() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="card">
             <p className="text-xs text-gray-500 mb-1">Total {isRecruiter ? 'Paid' : 'Earned'}</p>
             <p className="text-2xl font-bold text-teal-700">{formatCurrency(total)}</p>

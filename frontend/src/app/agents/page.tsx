@@ -75,7 +75,7 @@ function AgentsContent() {
   return (
     <div className="flex min-h-screen">
       <Sidebar role="recruiter" />
-      <main className="ml-56 flex-1 p-6 space-y-6">
+      <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">AI Agents</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -85,7 +85,7 @@ function AgentsContent() {
 
         {/* Summary bar */}
         <div className="card bg-teal-700 border-0">
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { label: 'Agents Running',  value: '3 / 4' },
               { label: 'Tasks Today',     value: '14' },
@@ -101,7 +101,7 @@ function AgentsContent() {
         </div>
 
         {/* Agents grid */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {agents.map(agent => (
             <div key={agent.id} className="card space-y-4 animate-fade-in">
               <div className="flex items-start justify-between">

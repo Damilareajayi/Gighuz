@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
-import { DollarSign, Lock, CheckCircle, ArrowRight, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star } from 'lucide-react';
+import { DollarSign, Lock, CheckCircle, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { MilestoneInstance, ChangeRequest, Rating } from '@/lib/types';
@@ -228,34 +228,31 @@ function PaymentsContent() {
         </div>
 
         <div className="card border-orange-600/20 bg-orange-50/50">
-          <p className="text-xs font-semibold text-orange-600 mb-3">How GigHuz Payments Work</p>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
-                <DollarSign size={14} className="text-teal-700" />
+          <p className="text-sm font-semibold text-orange-600 mb-4">How GigHuz Payments Work</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <DollarSign size={16} className="text-teal-700" />
               </div>
-              <p className="text-gray-500 text-center w-16">Client pays Stripe escrow</p>
+              <p className="text-gray-500">Client funds escrow</p>
             </div>
-            <ArrowRight size={12} className="text-gray-300 shrink-0" />
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
-                <Lock size={14} className="text-orange-600" />
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                <Lock size={16} className="text-orange-600" />
               </div>
-              <p className="text-gray-500 text-center w-16">Funds held secure</p>
+              <p className="text-gray-500">Funds held secure</p>
             </div>
-            <ArrowRight size={12} className="text-gray-300 shrink-0" />
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
-                <CheckCircle size={14} className="text-teal-700" />
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <CheckCircle size={16} className="text-teal-700" />
               </div>
-              <p className="text-gray-500 text-center w-16">AI auditor approves</p>
+              <p className="text-gray-500">AI auditor approves</p>
             </div>
-            <ArrowRight size={12} className="text-gray-300 shrink-0" />
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
-                <Globe size={14} className="text-teal-700" />
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center shrink-0">
+                <Globe size={16} className="text-teal-700" />
               </div>
-              <p className="text-gray-500 text-center w-20">Paystack/Flutterwave instant payout</p>
+              <p className="text-gray-500">Instant payout</p>
             </div>
           </div>
         </div>

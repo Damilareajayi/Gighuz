@@ -2,9 +2,31 @@
 
 Backend → Google Cloud Run. Frontend → Vercel. Both already read all
 config from environment variables — nothing in the code assumes local
-emulators once these are set. This is a runbook for you to run yourself:
-it needs your GCP and Vercel accounts, which nobody but you should
-authenticate.
+emulators once these are set.
+
+## Current status (as of 2026-08-10)
+
+Both are live:
+- **Backend**: `https://gighuz-backend-174251690360.us-central1.run.app` (Cloud Run, project `gighuz-app`, region `us-central1`)
+- **Frontend**: `https://gighuz.vercel.app` (Vercel project `dami17/gighuz`)
+
+Redeploying either after a code change:
+```bash
+# Backend
+cd backend && gcloud run deploy gighuz-backend --source . --project gighuz-app --region us-central1 --allow-unauthenticated --port 8080
+
+# Frontend
+cd frontend && vercel --prod --yes
+```
+Both CLIs are already authenticated on this machine. Env vars persist
+across redeploys unless explicitly changed with `--update-env-vars` /
+`vercel env`.
+
+**Still open**: native Google Sign-In on mobile (see `MOBILE.md`) and
+Firebase Storage-dependent features (avatar/resume upload) haven't been
+smoke-tested against the real bucket yet.
+
+## Runbook (for reference / rebuilding from scratch)
 
 ## 1. Backend → Google Cloud Run
 

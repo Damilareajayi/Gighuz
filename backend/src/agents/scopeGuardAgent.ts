@@ -36,7 +36,7 @@ Rules:
 `;
 
 export async function runScopeGuardAgent(input: ScopeGuardAgentInput): Promise<ScopeGuardAgentOutput> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
   try {
     const result = await model.generateContent(PROMPT(input));

@@ -46,7 +46,7 @@ function fallbackResume(f: Freelancer): string {
 }
 
 export async function runResumeAgent(freelancer: Freelancer): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
   try {
     const result = await model.generateContent(PROMPT(freelancer));
     const text = result.response.text().trim();

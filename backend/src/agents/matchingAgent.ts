@@ -47,7 +47,7 @@ export async function runMatchingAgent(
   input: MatchingAgentInput
 ): Promise<MatchingAgentOutput> {
   const { job } = input;
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
   const freelancersSnap = await db()
     .collection('freelancers')

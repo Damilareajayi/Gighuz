@@ -98,7 +98,7 @@ async function buildCaseStudy(submission: Submission, milestone: MilestoneInstan
 
 export async function runDeliverableAuditor(input: AuditorInput): Promise<AuditorOutput> {
   const { submission, milestone } = input;
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
   let output: AuditorOutput;
   try {

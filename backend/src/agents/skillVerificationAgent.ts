@@ -70,7 +70,7 @@ export async function runSkillVerificationAgent(input: SkillVerificationAgentInp
     input.portfolioLinks.map(async (url) => ({ url, text: await fetchLinkText(url) }))
   );
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
   try {
     const result = await model.generateContent(PROMPT(input.skills, evidence));

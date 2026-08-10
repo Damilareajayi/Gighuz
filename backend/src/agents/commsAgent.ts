@@ -40,7 +40,7 @@ Keep it under 100 words. Neutral, factual. Tell them a human reviewer will respo
 };
 
 export async function runCommsAgent(input: CommsAgentInput): Promise<CommsAgentOutput> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
   const promptFn = MESSAGE_PROMPTS[input.type];
 
   let message = '';

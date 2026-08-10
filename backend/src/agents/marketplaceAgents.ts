@@ -15,7 +15,7 @@ ${req.acceptanceCriteria.map((c) => `- ${c}`).join('\n') || '- (none specified)'
 }
 
 async function generate(systemPrompt: string, req: AgentInvocationRequest, fallback: () => string): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
   try {
     const result = await model.generateContent(`${systemPrompt}\n${briefFor(req)}`);
     const text = result.response.text().trim();

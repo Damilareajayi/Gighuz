@@ -149,8 +149,8 @@ function SubmissionsContent() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Submissions</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Submit work — AI audits before client delivery</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Submissions</h1>
+            <p className="text-base text-gray-500 mt-1">Submit work — AI audits before client delivery</p>
           </div>
           <button onClick={() => setShowSubmit(true)} disabled={submittableMilestones.length === 0} className="btn-primary flex items-center gap-2">
             <Upload size={14} /> Submit Work

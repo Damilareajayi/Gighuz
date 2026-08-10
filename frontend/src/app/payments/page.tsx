@@ -223,8 +223,8 @@ function PaymentsContent() {
       <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
 
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Payments</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Secure escrow → AI approval → instant local payout</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Payments</h1>
+          <p className="text-base text-gray-500 mt-1">Secure escrow → AI approval → instant local payout</p>
         </div>
 
         <div className="card border-orange-600/20 bg-orange-50/50">
@@ -261,19 +261,22 @@ function PaymentsContent() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="card">
-            <p className="text-xs text-gray-500 mb-1">Total {isRecruiter ? 'Paid' : 'Earned'}</p>
-            <p className="text-2xl font-bold text-teal-700">{formatCurrency(total)}</p>
+          <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-md bg-gradient-to-br from-teal-600 to-teal-800">
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+            <p className="relative text-sm text-white/70 mb-1">Total {isRecruiter ? 'Paid' : 'Earned'}</p>
+            <p className="relative text-3xl font-extrabold">{formatCurrency(total)}</p>
           </div>
-          <div className="card">
-            <p className="text-xs text-gray-500 mb-1">Pending Payout</p>
-            <p className="text-2xl font-bold text-orange-600">{formatCurrency(pending)}</p>
-            <p className="text-xs text-gray-400 mt-1">AI auditing in progress</p>
+          <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-md bg-gradient-to-br from-orange-500 to-orange-700">
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+            <p className="relative text-sm text-white/70 mb-1">Pending Payout</p>
+            <p className="relative text-3xl font-extrabold">{formatCurrency(pending)}</p>
+            <p className="relative text-sm text-white/60 mt-1">AI auditing in progress</p>
           </div>
-          <div className="card">
-            <p className="text-xs text-gray-500 mb-1">In Escrow</p>
-            <p className="text-2xl font-bold text-gray-700">{formatCurrency(escrowed)}</p>
-            <p className="text-xs text-gray-400 mt-1">Secured, awaiting work</p>
+          <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-md bg-gradient-to-br from-teal-950 to-teal-900">
+            <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+            <p className="relative text-sm text-white/70 mb-1">In Escrow</p>
+            <p className="relative text-3xl font-extrabold">{formatCurrency(escrowed)}</p>
+            <p className="relative text-sm text-white/60 mt-1">Secured, awaiting work</p>
           </div>
         </div>
 

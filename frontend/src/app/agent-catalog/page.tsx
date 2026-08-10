@@ -47,8 +47,8 @@ function AgentCatalogContent() {
       <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Agent Catalog</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Third-party AI agents, ready to assign — audited the same as any freelancer</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Agent Catalog</h1>
+            <p className="text-base text-gray-500 mt-1">AI agents ready to assign — audited before you ever see the output</p>
           </div>
           <div className="flex gap-2">
             <select className="border border-surface-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-500"
@@ -79,15 +79,15 @@ function AgentCatalogContent() {
           {filtered.map(l => (
             <div key={l.id} className="card-hover animate-fade-in">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                  <Bot size={18} className="text-orange-600" />
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm shrink-0">
+                  <Bot size={19} className="text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-gray-900 truncate">{l.name}</p>
                   <span className="badge badge-teal text-[10px]">{CATEGORY_LABELS[l.category]}</span>
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mb-3 leading-relaxed">{l.description}</p>
+              <p className="text-sm text-gray-500 mb-3 leading-relaxed">{l.description}</p>
               <div className="flex gap-1.5 flex-wrap mb-3">
                 {l.capabilities.slice(0, 4).map(c => (
                   <span key={c} className="text-xs bg-orange-50 text-orange-700 px-2 py-0.5 rounded">{c}</span>

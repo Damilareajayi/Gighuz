@@ -32,8 +32,8 @@ function TalentContent() {
       <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Talent Pool</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Vetted professionals, AI-scored for every job</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Talent Pool</h1>
+            <p className="text-base text-gray-500 mt-1">Vetted professionals, AI-scored for every job</p>
           </div>
           <div className="relative">
             <Search size={15} className="absolute left-3 top-2.5 text-gray-400" />

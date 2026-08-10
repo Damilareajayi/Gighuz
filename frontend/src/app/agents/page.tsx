@@ -77,8 +77,8 @@ function AgentsContent() {
       <Sidebar role="recruiter" />
       <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">AI Agents</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">AI Agents</h1>
+          <p className="text-base text-gray-500 mt-1">
             Four Gemini-powered agents run the GigHuz platform autonomously — illustrative overview, not a live feed
           </p>
         </div>

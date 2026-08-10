@@ -143,8 +143,8 @@ function ProfileContent() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">My Profile</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Your professional identity on GigHuz</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">My Profile</h1>
+            <p className="text-base text-gray-500 mt-1">Your professional identity on GigHuz</p>
           </div>
           {profile && (
             <button

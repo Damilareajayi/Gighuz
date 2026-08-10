@@ -262,8 +262,8 @@ function JobsContent() {
       <main className="md:ml-56 flex-1 px-4 md:px-6 pt-20 md:pt-6 pb-24 md:pb-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">My Jobs</h1>
-            <p className="text-sm text-gray-500 mt-0.5">All jobs posted · AI-structured · human or AI-agent talent matched</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">My Jobs</h1>
+            <p className="text-base text-gray-500 mt-1">All jobs posted, AI-structured, and matched to the right agent</p>
           </div>
           <button onClick={() => setShowModal(true)} className="btn-primary flex items-center gap-2">
             <Plus size={16} /> Post a Job

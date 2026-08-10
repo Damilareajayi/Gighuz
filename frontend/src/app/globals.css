@@ -23,9 +23,10 @@
   .badge-red    { @apply badge bg-red-50 text-red-600; }
 
   /* Buttons — generous touch targets and a tactile press state, since this
-     ships as a real mobile app via Capacitor, not just a responsive site. */
-  .btn-primary  { @apply bg-teal-700 text-white font-semibold px-5 py-3 rounded-xl hover:bg-teal-800 active:scale-[0.97] transition-all text-sm disabled:opacity-40 disabled:active:scale-100; }
-  .btn-orange   { @apply bg-orange-600 text-white font-semibold px-5 py-3 rounded-xl hover:bg-orange-700 active:scale-[0.97] transition-all text-sm disabled:opacity-40 disabled:active:scale-100; }
+     ships as a real mobile app via Capacitor, not just a responsive site.
+     Gradient fills instead of flat color, matching the landing page. */
+  .btn-primary  { @apply bg-gradient-to-r from-teal-600 to-teal-800 text-white font-semibold px-5 py-3 rounded-xl hover:from-teal-500 hover:to-teal-700 active:scale-[0.97] transition-all text-sm shadow-sm shadow-teal-900/10 disabled:opacity-40 disabled:active:scale-100; }
+  .btn-orange   { @apply bg-gradient-to-r from-orange-500 to-orange-700 text-white font-semibold px-5 py-3 rounded-xl hover:from-orange-400 hover:to-orange-600 active:scale-[0.97] transition-all text-sm shadow-sm shadow-orange-900/10 disabled:opacity-40 disabled:active:scale-100; }
   .btn-outline  { @apply border border-surface-border text-gray-600 font-medium px-5 py-3 rounded-xl hover:bg-surface-alt active:scale-[0.97] transition-all text-sm; }
   .btn-ghost    { @apply text-gray-500 hover:text-teal-700 hover:bg-teal-50 px-3 py-2.5 rounded-xl transition-colors text-sm; }
 

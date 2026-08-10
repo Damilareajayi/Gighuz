@@ -36,12 +36,21 @@ async function generate(systemPrompt: string, req: AgentInvocationRequest, fallb
   return { output: text ?? fallback(), outputUrls: [] };
 }
 
-// Pulls the content out of the first fenced code block in a model response
-// (```csv ... ``` etc). Falls back to the whole response if the model
-// didn't fence it -- keeps file-export agents robust to formatting drift.
-function extractFencedBlock(text: string): string {
-  const match = text.match(/```[a-zA-Z]*\r?\n([\s\S]*?)```/);
-  return (match ? match[1] : text).trim();
+// Pulls the deliverable out of a model response that may contain several
+// fenced code blocks (e.g. formula snippets AND a csv block) -- prompts ask
+// for the actual file content tagged with a specific language, so this
+// looks for that tag specifically rather than just grabbing the first
+// fenced block, which was pulling out formula examples instead of the CSV
+// on early testing. Falls back to the last fenced block of any kind, then
+// the whole response, if the tagged block isn't found.
+function extractFencedBlock(text: string, lang: string): string {
+  const tagged = new RegExp('```' + lang + '\\r?\\n([\\s\\S]*?)```', 'i').exec(text);
+  if (tagged) return tagged[1].trim();
+
+  const anyBlocks = [...text.matchAll(/```[a-zA-Z]*\r?\n([\s\S]*?)```/g)];
+  if (anyBlocks.length > 0) return anyBlocks[anyBlocks.length - 1][1].trim();
+
+  return text.trim();
 }
 
 // Generates a file-shaped deliverable and uploads it to Storage. Degrades
@@ -52,11 +61,11 @@ async function generateFile(
   systemPrompt: string,
   req: AgentInvocationRequest,
   fallback: () => string,
-  file: { slug: string; extension: string; mimeType: string; introText: (content: string) => string }
+  file: { slug: string; extension: string; mimeType: string; lang: string; introText: (content: string) => string }
 ): Promise<AgentRunResult> {
   const text = await callGemini(systemPrompt, req);
   const raw = text ?? fallback();
-  const fileContent = extractFencedBlock(raw);
+  const fileContent = extractFencedBlock(raw, file.lang);
 
   try {
     const url = await uploadFile(
@@ -312,6 +321,7 @@ export async function runExcelFormulaAgent(req: AgentInvocationRequest): Promise
     slug: 'excel-formatter',
     extension: 'csv',
     mimeType: 'text/csv',
+    lang: 'csv',
     introText: (csv) => `Built a spreadsheet template for "${req.title}" — download it and adapt the formulas to your real data.\n\nPreview:\n${csv.split('\n').slice(0, 4).join('\n')}`,
   });
 }
@@ -339,6 +349,7 @@ export async function runDataCleanerAgent(req: AgentInvocationRequest): Promise<
     slug: 'data-cleaner',
     extension: 'csv',
     mimeType: 'text/csv',
+    lang: 'csv',
     introText: (csv) => `Cleaned dataset for "${req.title}" ready to download.\n\nPreview:\n${csv.split('\n').slice(0, 4).join('\n')}`,
   });
 }
@@ -364,6 +375,7 @@ export async function runTranscriptCleanerAgent(req: AgentInvocationRequest): Pr
     slug: 'transcript-cleaner',
     extension: 'txt',
     mimeType: 'text/plain',
+    lang: 'text',
     introText: (txt) => `Cleaned transcript for "${req.title}" ready to download.\n\nPreview:\n${txt.slice(0, 300)}${txt.length > 300 ? '…' : ''}`,
   });
 }
@@ -392,6 +404,7 @@ export async function runTranscriptGeneratorAgent(req: AgentInvocationRequest): 
     slug: 'transcript-generator',
     extension: 'txt',
     mimeType: 'text/plain',
+    lang: 'text',
     introText: (txt) => `Meeting notes document for "${req.title}" ready to download.\n\nPreview:\n${txt.slice(0, 300)}${txt.length > 300 ? '…' : ''}`,
   });
 }
@@ -417,6 +430,7 @@ export async function runTranslatorAgent(req: AgentInvocationRequest): Promise<A
     slug: 'translator',
     extension: 'txt',
     mimeType: 'text/plain',
+    lang: 'text',
     introText: (txt) => `Translation for "${req.title}" ready to download.\n\nPreview:\n${txt.slice(0, 300)}${txt.length > 300 ? '…' : ''}`,
   });
 }

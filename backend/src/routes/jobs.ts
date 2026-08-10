@@ -46,15 +46,14 @@ router.post('/', requireAuth(['recruiter']), async (req: AuthRequest, res: Respo
 
     await db().collection('jobs').doc(jobId).set(job);
 
-    // Trigger Structuring Agent asynchronously
+    // Publish for any future async consumer (analytics, etc.) -- there's no
+    // Pub/Sub subscriber deployed yet, so this alone doesn't run anything.
+    // The actual structuring happens right here, fire-and-forget.
     await publishEvent('job.posted', { jobId, recruiterId: req.profileId });
 
-    // Also run synchronously in dev/demo mode
-    if (process.env.NODE_ENV !== 'production') {
-      runStructuringAgent({ jobId, recruiterId: req.profileId!, descriptionRaw }).catch(
-        (err) => console.error('[Jobs] Structuring agent error:', err)
-      );
-    }
+    runStructuringAgent({ jobId, recruiterId: req.profileId!, descriptionRaw }).catch(
+      (err) => console.error('[Jobs] Structuring agent error:', err)
+    );
 
     return res.status(201).json({ success: true, data: { jobId, status: 'pending_structure' } });
   } catch (err: any) {

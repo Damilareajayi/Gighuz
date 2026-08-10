@@ -141,9 +141,13 @@ router.post('/milestones', requireAuth(['recruiter']), async (req: AuthRequest, 
 
     await db().collection('milestones').doc(milestoneId).set(milestone);
 
-    // Dev/demo convenience — in production, escrow funding completes via the
-    // Stripe webhook, which is where this would normally be triggered from.
-    if (agentListingId && process.env.NODE_ENV !== 'production') {
+    // In principle escrow funding should complete via the Stripe webhook,
+    // but the frontend has no Stripe Elements flow to actually collect a
+    // card yet, and the webhook handler doesn't invoke the agent even when
+    // it does fire -- so this is the only reachable path today. Kick the
+    // agent off immediately; the escrow is still authorize-only until the
+    // Deliverable Auditor passes it, so nothing is paid prematurely.
+    if (agentListingId) {
       db().collection('milestones').doc(milestoneId).update({ status: 'in_progress', updatedAt: new Date().toISOString() })
         .then(() => runAgentMilestone({ ...milestone, status: 'in_progress' }))
         .catch((err) => console.error('[Payments] Failed to kick off agent milestone:', err));

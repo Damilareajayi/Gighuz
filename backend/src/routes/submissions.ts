@@ -64,19 +64,18 @@ router.post('/', requireAuth(['freelancer']), async (req: AuthRequest, res: Resp
       updatedAt: now,
     });
 
-    // Trigger Auditor Agent via Pub/Sub
+    // Publish for any future async consumer -- there's no Pub/Sub subscriber
+    // deployed yet, so this alone doesn't run anything. The actual audit
+    // happens right here, fire-and-forget.
     await publishEvent('submission.received', {
       submissionId,
       milestoneId: data.milestoneId,
       freelancerId: req.profileId,
     });
 
-    // Run auditor immediately in dev/demo mode
-    if (process.env.NODE_ENV !== 'production') {
-      runDeliverableAuditor({ submission, milestone }).catch(
-        (err) => console.error('[Submissions] Auditor error:', err)
-      );
-    }
+    runDeliverableAuditor({ submission, milestone }).catch(
+      (err) => console.error('[Submissions] Auditor error:', err)
+    );
 
     return res.status(201).json({
       success: true,

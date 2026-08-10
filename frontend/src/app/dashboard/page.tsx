@@ -4,6 +4,7 @@ import { Briefcase, DollarSign, Zap, Users, ChevronRight, Plus } from 'lucide-re
 import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { formatCurrency, statusClass, statusLabel, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { Job } from '@/lib/types';
@@ -103,7 +104,7 @@ function DashboardContent() {
           </div>
 
           {loading && <p className="text-sm text-gray-400">Loading jobs…</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <ErrorBanner message={error} />}
           {!loading && !error && jobs.length === 0 && (
             <div className="card text-center py-8">
               <p className="text-sm text-gray-500">No jobs posted yet.</p>

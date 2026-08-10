@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { Bot, Search } from 'lucide-react';
 import { api } from '@/lib/api';
 import { AgentListing, AgentCategory } from '@/lib/types';
@@ -67,7 +68,7 @@ function AgentCatalogContent() {
         </div>
 
         {loading && <p className="text-sm text-gray-400">Loading agents…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
         {!loading && !error && filtered.length === 0 && (
           <div className="card text-center py-10">
             <Bot size={28} className="mx-auto text-gray-300 mb-2" />

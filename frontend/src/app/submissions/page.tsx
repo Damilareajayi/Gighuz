@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { Upload, CheckCircle, AlertTriangle, Clock, Zap, X } from 'lucide-react';
 import { cn, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
@@ -114,7 +115,7 @@ function SubmitForm({ milestones, onClose, onSubmitted }: {
             </div>
           )}
         </div>
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
         <button onClick={handleSubmit} disabled={!milestoneId || files.length === 0 || loading} className="btn-primary w-full">
           {loading ? 'Submitting…' : 'Submit for AI Audit'}
         </button>
@@ -178,7 +179,7 @@ function SubmissionsContent() {
           <p className="section-label">Your Submissions</p>
 
           {loading && <p className="text-sm text-gray-400">Loading…</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <ErrorBanner message={error} />}
           {!loading && !error && submissions.length === 0 && (
             <div className="card text-center py-10">
               <p className="text-sm text-gray-500">No submissions yet.</p>

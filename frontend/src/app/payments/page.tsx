@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { DollarSign, Lock, CheckCircle, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
@@ -90,7 +91,7 @@ function RatingWidget({ milestoneId, isRecruiter }: { milestoneId: string; isRec
           </button>
         </div>
       )}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <ErrorBanner message={error} />}
     </div>
   );
 }
@@ -180,7 +181,7 @@ function MilestoneRow({ m, isRecruiter }: { m: MilestoneInstance; isRecruiter: b
                 <textarea className="w-full border border-surface-border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-teal-500 resize-none h-16"
                   placeholder="Describe the change you need — the Scope Guard Agent will rule whether it's covered by the original milestone or needs its own payment."
                   value={description} onChange={e => setDescription(e.target.value)} />
-                {error && <p className="text-xs text-red-600">{error}</p>}
+                {error && <ErrorBanner message={error} />}
                 <div className="flex gap-2">
                   <button onClick={handleSubmitChange} disabled={submitting || description.trim().length < 10} className="btn-primary text-xs px-3 py-1.5">
                     {submitting ? 'Checking scope…' : 'Submit for scope check'}
@@ -281,7 +282,7 @@ function PaymentsContent() {
           <p className="section-label mb-3">Milestones</p>
 
           {loading && <p className="text-sm text-gray-400">Loading…</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <ErrorBanner message={error} />}
           {!loading && !error && milestones.length === 0 && (
             <div className="card text-center py-10">
               <p className="text-sm text-gray-500">No milestones yet.</p>

@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { Plus, Bot, CheckCircle2, PauseCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { AgentListing, AgentCategory } from '@/lib/types';
@@ -89,7 +90,7 @@ function RegisterForm({ onClose, onRegistered }: { onClose: () => void; onRegist
       <input type="number" className="w-full border border-surface-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-teal-500"
         placeholder="Indicative price per task (USD)" value={pricePerTaskUsd} onChange={e => setPricePerTaskUsd(e.target.value)} />
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <ErrorBanner message={error} />}
 
       <button onClick={handleSubmit} disabled={!valid || busy} className="btn-primary w-full">
         {busy ? 'Registering…' : 'Register Agent'}
@@ -137,7 +138,7 @@ function MyAgentsContent() {
         {showForm && <RegisterForm onClose={() => setShowForm(false)} onRegistered={load} />}
 
         {loading && <p className="text-sm text-gray-400">Loading…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
         {!loading && !error && listings.length === 0 && (
           <div className="card text-center py-10">
             <Bot size={28} className="mx-auto text-gray-300 mb-2" />

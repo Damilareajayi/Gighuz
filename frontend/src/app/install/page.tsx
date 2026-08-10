@@ -1,8 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Apple, ArrowLeft, Share, MoreVertical, Plus, Check, Monitor } from 'lucide-react';
+import { Apple, ArrowLeft, Share, MoreVertical, Plus, Check, Monitor, CheckCircle2 } from 'lucide-react';
 import { LogoMark } from '@/components/Logo';
+
+function isRunningInstalled(): boolean {
+  if (typeof window === 'undefined') return false;
+  const standaloneMedia = window.matchMedia?.('(display-mode: standalone)').matches;
+  const iosStandalone = (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+  return Boolean(standaloneMedia || iosStandalone);
+}
 
 function AndroidIcon({ size = 22, className = '' }: { size?: number; className?: string }) {
   return (
@@ -49,6 +56,11 @@ const steps: Record<Platform, { icon: React.ReactNode; text: string }[]> = {
 
 export default function InstallPage() {
   const [active, setActive] = useState<Platform>('ios');
+  const [installed, setInstalled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setInstalled(isRunningInstalled());
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface-alt">
@@ -67,6 +79,18 @@ export default function InstallPage() {
         </div>
       </header>
 
+      {installed ? (
+        <main className="max-w-3xl mx-auto px-6 py-20 text-center">
+          <div className="w-14 h-14 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 size={26} className="text-teal-700" />
+          </div>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">You're already set up</h1>
+          <p className="text-base text-gray-500 mt-3 max-w-md mx-auto">
+            You're using GigHuz as an installed app — there's nothing left to install.
+          </p>
+          <Link href="/" className="btn-primary inline-flex mt-7">Back to GigHuz</Link>
+        </main>
+      ) : (
       <main className="max-w-3xl mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Install GigHuz</h1>
@@ -105,6 +129,7 @@ export default function InstallPage() {
           install feature — no App Store or Play Store download required.
         </p>
       </main>
+      )}
     </div>
   );
 }

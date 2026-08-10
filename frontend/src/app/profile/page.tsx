@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { Star, MapPin, DollarSign, ExternalLink, Camera, FileText, Sparkles, Upload, ShieldCheck, BadgeCheck } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Freelancer, CaseStudy } from '@/lib/types';
@@ -157,7 +158,7 @@ function ProfileContent() {
         </div>
 
         {loading && <p className="text-sm text-gray-400">Loading profile…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
 
         {profile && (
           <>

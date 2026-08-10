@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Plus, ChevronRight, Globe, Bot, Users, DollarSign } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { statusClass, statusLabel, formatCurrency, timeAgo } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { Job, Freelancer, AgentListing, MilestoneInstance } from '@/lib/types';
@@ -59,7 +60,7 @@ function PostJobModal({ onClose, onPosted }: { onClose: () => void; onPosted: ()
                 The AI Structuring Agent will extract a title, milestones, skills, and budget from this description. {description.length}/50 min chars.
               </p>
             </div>
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <ErrorBanner message={error} />}
             <button onClick={handleSubmit} disabled={description.length < 50 || loading} className="btn-primary w-full">
               {loading ? 'Submitting to AI agents...' : 'Post Job & Start AI Structuring'}
             </button>
@@ -111,7 +112,7 @@ function AssignWorkerPanel({ job, onAssigned }: { job: Job; onAssigned: () => vo
         </button>
       </div>
 
-      {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+      {error && <ErrorBanner message={error} />}
 
       {tab === 'human' ? (
         <div className="space-y-1.5 max-h-48 overflow-y-auto">
@@ -271,7 +272,7 @@ function JobsContent() {
         </div>
 
         {loading && <p className="text-sm text-gray-400">Loading jobs…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
         {!loading && !error && jobs.length === 0 && (
           <div className="card text-center py-10">
             <p className="text-sm text-gray-500">You haven't posted any jobs yet.</p>

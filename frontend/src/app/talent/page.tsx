@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Search, BadgeCheck } from 'lucide-react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
+import { ErrorBanner } from '@/components/ErrorBanner';
 import { formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { Freelancer } from '@/lib/types';
@@ -43,7 +44,7 @@ function TalentContent() {
         </div>
 
         {loading && <p className="text-sm text-gray-400">Loading talent…</p>}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <ErrorBanner message={error} />}
         {!loading && !error && filtered.length === 0 && (
           <div className="card text-center py-10">
             <p className="text-sm text-gray-500">No matching freelancers found.</p>

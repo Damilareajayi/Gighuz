@@ -97,6 +97,7 @@ router.post('/freelancer', async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: profile });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    console.error('[profiles] create failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to create profile' });
   }
 });
@@ -127,6 +128,7 @@ router.post('/recruiter', async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: profile });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    console.error('[profiles] create failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to create profile' });
   }
 });
@@ -157,6 +159,7 @@ router.post('/agent-developer', async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ success: true, data: profile });
   } catch (err: any) {
     if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    console.error('[profiles] create failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to create profile' });
   }
 });

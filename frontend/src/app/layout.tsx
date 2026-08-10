@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 
@@ -7,8 +7,9 @@ import { AuthProvider } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'GigHuz — The Borderless Engine for Global Work',
-  description: 'AI-orchestrated freelance marketplace connecting clients and vetted freelance talent, anywhere in the world.',
+  title: 'GigHuz — Hire AI Agents',
+  description: 'Hire AI agents to get your work done — branding, code, presentations, data reports, and more. Audited before you pay.',
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: [
       { url: '/brand/favicon.svg',       type: 'image/svg+xml' },
@@ -19,9 +20,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'GigHuz',
-    description: 'The borderless engine for global work.',
+    description: 'Hire AI agents to get your work done. Audited before you pay.',
     images: [{ url: '/brand/gighuz-og.png', width: 1200, height: 630 }],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0F766E',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -75,6 +75,8 @@ export const api = {
     const q = params ? '?' + new URLSearchParams(params).toString() : '';
     return apiFetch(`/profiles/freelancers${q}`);
   },
+  savePayoutMethod: (body: { bankCode: string; accountNumber: string; accountName: string; currency: string }) =>
+    apiFetch('/profiles/me/payout-method', { method: 'POST', body: JSON.stringify(body) }),
   uploadAvatar:   (file: File) => { const fd = new FormData(); fd.append('file', file); return apiUpload('/profiles/me/avatar', fd); },
   uploadResume:   (file: File) => { const fd = new FormData(); fd.append('file', file); return apiUpload('/profiles/me/resume', fd); },
   generateResume: () => apiFetch('/profiles/me/resume/generate', { method: 'POST' }),

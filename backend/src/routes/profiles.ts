@@ -8,6 +8,7 @@ import { db } from '../services/firebase';
 import { uploadFile, extensionForMimeType } from '../services/storage';
 import { runResumeAgent } from '../agents/resumeAgent';
 import { runSkillVerificationAgent } from '../agents/skillVerificationAgent';
+import { createPaystackRecipient } from '../services/payouts';
 import { Freelancer, UserRole } from '../types';
 
 const router = Router();
@@ -59,6 +60,13 @@ const AgentDeveloperSchema = z.object({
   name: z.string().min(2).max(100),
   company: z.string().optional(),
   country: z.string().length(2),
+});
+
+const PayoutMethodSchema = z.object({
+  bankCode: z.string().min(1).max(20),
+  accountNumber: z.string().min(4).max(34),
+  accountName: z.string().min(2).max(100),
+  currency: z.string().length(3),
 });
 
 // POST /profiles/freelancer — onboard a new freelancer
@@ -183,7 +191,7 @@ router.patch('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
     const allowed = req.role === 'freelancer'
       ? ['bio', 'skills', 'hourlyRate', 'currency', 'portfolioLinks', 'whatsappNumber', 'availability']
       : req.role === 'agent_developer'
-      ? ['name', 'company', 'whatsappNumber', 'paystackRecipientCode', 'bankCode', 'accountNumber', 'accountName', 'currency']
+      ? ['name', 'company', 'whatsappNumber']
       : ['name', 'company'];
 
     const updates: Record<string, unknown> = {};
@@ -197,6 +205,50 @@ router.patch('/me', requireAuth(), async (req: AuthRequest, res: Response) => {
   } catch (err) {
     console.error('[profiles] update me failed:', err);
     return res.status(500).json({ success: false, error: 'Failed to update profile' });
+  }
+});
+
+// POST /profiles/me/payout-method — set up how a freelancer or agent developer
+// gets paid. Attempts to create a real Paystack transfer recipient for
+// Nigerian users (faster/cheaper payouts); everywhere else the raw bank
+// details are stored and Flutterwave is used at payout time. Storing the
+// raw fields always succeeds even if the Paystack call fails or isn't
+// configured — routePayout() falls back gracefully either way.
+router.post('/me/payout-method', requireAuth(['freelancer', 'agent_developer']), async (req: AuthRequest, res: Response) => {
+  try {
+    const data = PayoutMethodSchema.parse(req.body);
+    const collection = collectionForRole(req.role);
+    const doc = await db().collection(collection).doc(req.profileId!).get();
+    if (!doc.exists) return res.status(404).json({ success: false, error: 'Profile not found' });
+
+    const country = (doc.data() as { country?: string }).country;
+    const updates: Record<string, unknown> = {
+      bankCode: data.bankCode,
+      accountNumber: data.accountNumber,
+      accountName: data.accountName,
+      currency: data.currency,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (country === 'NG') {
+      try {
+        updates.paystackRecipientCode = await createPaystackRecipient(
+          data.accountName,
+          data.accountNumber,
+          data.bankCode,
+          data.currency
+        );
+      } catch (err: any) {
+        console.error('[profiles] Paystack recipient creation failed, storing raw payout details instead:', err.message);
+      }
+    }
+
+    await db().collection(collection).doc(req.profileId!).update(updates);
+    return res.json({ success: true, message: 'Payout method saved', data: { paystackLinked: Boolean(updates.paystackRecipientCode) } });
+  } catch (err: any) {
+    if (err.name === 'ZodError') return res.status(400).json({ success: false, error: err.errors });
+    console.error('[profiles] save payout method failed:', err);
+    return res.status(500).json({ success: false, error: 'Failed to save payout method' });
   }
 });
 

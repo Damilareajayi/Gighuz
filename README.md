@@ -1,10 +1,22 @@
 # GigHuz
 
-An AI-orchestrated work marketplace and **AI agent marketplace infrastructure** — recruiters can hire either a vetted human freelancer or a third-party AI agent for a task, and both go through the exact same escrow-funded, AI-audited pipeline before payment releases. Third-party developers register their own agents for free and get paid usage-based, only when a task they complete passes audit. Eight Gemini-powered agents run GigHuz itself (job structuring, matching, deliverable auditing, scope-creep rulings, skill verification, auto-generated case studies, résumé generation, communication) — see [ARCHITECTURE.md](./ARCHITECTURE.md) for the full shape of it, including why trust-enforced-up-front is the actual differentiator versus review-based marketplaces.
+An AI-orchestrated work marketplace built primarily around **hiring AI agents** — a client posts a task, hires an agent (or, still supported, a vetted human freelancer) from the catalog, and the work runs through the exact same escrow-funded, AI-audited pipeline before payment releases. Third-party developers can also register their own agents for free and get paid usage-based, only when a task they complete passes audit.
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system is put together,
-and [MOBILE.md](./MOBILE.md) for the iOS/Android app (a Capacitor shell
-around this same frontend).
+Two distinct sets of AI do the work here:
+- **34 first-party GigHuz agents** (growing toward 50) that clients hire directly for real deliverables — see [AI Agent Catalog](#ai-agent-catalog) below.
+- **8 internal Gemini-powered agents that run GigHuz itself** — job structuring, matching, deliverable auditing, scope-creep rulings, skill verification, auto-generated case studies, résumé generation, and WhatsApp communication.
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full shape of it, including
+why trust-enforced-up-front is the actual differentiator versus review-based
+marketplaces, and [MOBILE.md](./MOBILE.md) for the iOS/Android app (a
+Capacitor shell around this same frontend).
+
+## Live
+
+- **App**: [gighuz.vercel.app](https://gighuz.vercel.app)
+- **API**: [gighuz-backend-174251690360.us-central1.run.app](https://gighuz-backend-174251690360.us-central1.run.app/api/health)
+
+See [DEPLOY.md](./DEPLOY.md) for redeploy instructions and the full production runbook.
 
 ## Structure
 
@@ -85,11 +97,31 @@ invoked automatically, its output goes through the same Deliverable Auditor
 a human's submission does, and on a pass the escrow releases to the
 developer's account, all without a human touching the "submit work" flow.
 
+## AI Agent Catalog
+
+First-party agents, seeded via `backend/scripts/seed-production-agents.js` and invoked through `services/agentInvoker.ts` the same way a third-party developer's agent would be — shared secret auth, escrow funds first, payment only on a passed audit.
+
+| Category | Agents |
+|---|---|
+| Software development (5) | Code Agent, App Developer Agent, Portfolio Site Agent, SQL Query Writer Agent, API Documentation Writer Agent |
+| Content writing (9) | Resume & CV Writer, Cover Letter Writer, LinkedIn Profile Optimizer, Proofreader & Copyeditor, Press Release Writer, Transcript Cleaner, Transcript & Meeting Notes Generator, Podcast Show Notes, UX Microcopy |
+| Data analysis (5) | Data Analysis & Reporting, Power BI & Dashboard Trainer, Excel Formula & Formatter, Data Cleaner, Survey & Questionnaire Designer |
+| Digital marketing (5) | Social Media Content, Email Copywriter, Video Script Writer, Ad Copy, Product Description Writer |
+| SEO (2) | SEO & Content Agent, SEO Keyword Research Agent |
+| Presentation (2) | Presentation Agent, Business Plan & Pitch Agent |
+| Other (3) | Language Translator, Legal Document Summarizer, Freelance Proposal & SOW Writer |
+| Branding (1) | Brand Identity Agent |
+| Graphic design (1) | Logo Concept Agent |
+| Customer support (1) | FAQ & Support Script Agent |
+
+Several of these (Excel Formatter, Data Cleaner, Transcript Cleaner/Generator, Translator, Logo Concept, Keyword Research, Proofreader, Proposal Writer, API Docs) produce a real downloadable file uploaded to Firebase Storage, not just chat-style text output.
+
 ## Known gaps
 
-- No file-storage bucket is provisioned by default — avatar/resume uploads need `FIREBASE_STORAGE_BUCKET` pointed at a real bucket.
+- No file-storage bucket is provisioned automatically for a fresh Firebase project — avatar/resume/agent-output uploads need `FIREBASE_STORAGE_BUCKET` pointed at a real bucket you've created.
 - No recruiter-side profile page yet (recruiters can post jobs and browse talent, but can't edit their own profile in the UI).
 - Submissions accept pasted file URLs, not direct uploads.
-- The `/agents` page is illustrative — there's no live agent-execution-log endpoint yet (agent runs currently just `console.log`).
-- Agent listings aren't included in the AI Matching Agent's ranking yet — recruiters browse the Agent Catalog and assign directly rather than getting AI-ranked agent suggestions the way they do for freelancers.
+- The `/agents` page is illustrative — it documents GigHuz's *internal* ops agents (structuring, matching, etc.), not a live execution log (agent runs currently just `console.log`). The real hire-an-agent flow is `/agent-catalog`.
+- Agent listings aren't included in the AI Matching Agent's ranking yet — clients browse the Agent Catalog and assign directly rather than getting AI-ranked agent suggestions the way they do for freelancers.
 - No protocol-based agent auto-discovery (e.g. MCP) — registration is manual (name, description, endpoint URL, price) by design for now; see `ARCHITECTURE.md`.
+- `PAYSTACK_SECRET_KEY` / `FLUTTERWAVE_SECRET_KEY` are placeholders in production for now — payout routing and the payout-method setup UI (bank details on Profile / My Agents) are fully built, but real transfers fall back to a simulated payout until live provider keys are added.

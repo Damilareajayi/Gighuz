@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { ErrorBanner } from '@/components/ErrorBanner';
+import { PayoutMethodCard } from '@/components/PayoutMethodCard';
 import { Plus, Bot, CheckCircle2, PauseCircle } from 'lucide-react';
 import { api } from '@/lib/api';
-import { AgentListing, AgentCategory } from '@/lib/types';
+import { AgentListing, AgentCategory, AgentDeveloper } from '@/lib/types';
 import { formatCurrency, timeAgo } from '@/lib/utils';
 
 const CATEGORY_LABELS: Record<AgentCategory, string> = {
@@ -101,6 +102,7 @@ function RegisterForm({ onClose, onRegistered }: { onClose: () => void; onRegist
 
 function MyAgentsContent() {
   const [listings, setListings] = useState<AgentListing[]>([]);
+  const [profile, setProfile] = useState<AgentDeveloper | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -114,6 +116,7 @@ function MyAgentsContent() {
   }
 
   useEffect(load, []);
+  useEffect(() => { api.getMe().then((data: any) => setProfile(data)).catch(() => {}); }, []);
 
   async function toggleStatus(listing: AgentListing) {
     const nextStatus = listing.status === 'active' ? 'disabled' : 'active';
@@ -134,6 +137,20 @@ function MyAgentsContent() {
             <Plus size={16} /> Register Agent
           </button>
         </div>
+
+        {profile && (
+          <PayoutMethodCard
+            country={profile.country}
+            initial={{
+              bankCode: profile.bankCode,
+              accountNumber: profile.accountNumber,
+              accountName: profile.accountName,
+              currency: profile.currency,
+              paystackRecipientCode: profile.paystackRecipientCode,
+            }}
+            onSaved={(fields) => setProfile(p => p && { ...p, ...fields })}
+          />
+        )}
 
         {showForm && <RegisterForm onClose={() => setShowForm(false)} onRegistered={load} />}
 

@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { ErrorBanner } from '@/components/ErrorBanner';
-import { DollarSign, Lock, CheckCircle, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star } from 'lucide-react';
+import { DollarSign, Lock, CheckCircle, Globe, MessageSquarePlus, ShieldCheck, ShieldAlert, Star, Wallet } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { MilestoneInstance, ChangeRequest, Rating } from '@/lib/types';
@@ -217,6 +218,7 @@ function PaymentsContent() {
   const escrowed = milestones.filter((m) => m.status === 'pending' || m.status === 'in_progress').reduce((s, m) => s + m.paymentAmountUsd, 0);
   const isRecruiter = profile?.role === 'recruiter';
   const sidebarRole = profile?.role === 'recruiter' ? 'recruiter' : profile?.role === 'agent_developer' ? 'agent_developer' : 'freelancer';
+  const hasPayoutMethod = Boolean(profile?.bankCode && profile?.accountNumber);
 
   return (
     <div className="flex min-h-screen">
@@ -227,6 +229,19 @@ function PaymentsContent() {
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Payments</h1>
           <p className="text-base text-gray-500 mt-1">Secure escrow → AI approval → instant local payout</p>
         </div>
+
+        {!isRecruiter && !hasPayoutMethod && (
+          <Link href={sidebarRole === 'agent_developer' ? '/my-agents' : '/profile'}
+            className="card border-orange-200 bg-orange-50/60 flex items-center gap-3 hover:bg-orange-50 transition-colors">
+            <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
+              <Wallet size={15} className="text-orange-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-orange-700">Set up your payout method</p>
+              <p className="text-xs text-orange-600/80 mt-0.5">Add your bank details so completed work can actually pay out.</p>
+            </div>
+          </Link>
+        )}
 
         <div className="card border-orange-600/20 bg-orange-50/50">
           <p className="text-sm font-semibold text-orange-600 mb-4">How GigHuz Payments Work</p>

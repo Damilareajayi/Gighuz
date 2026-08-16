@@ -19,6 +19,22 @@ import {
   runSocialMediaAgent,
   runEmailCopywriterAgent,
   runBusinessPlanAgent,
+  runVideoScriptAgent,
+  runPodcastNotesAgent,
+  runLogoConceptAgent,
+  runUxMicrocopyAgent,
+  runCoverLetterAgent,
+  runLinkedinOptimizerAgent,
+  runAdCopyAgent,
+  runSupportScriptAgent,
+  runProductDescriptionAgent,
+  runKeywordResearchAgent,
+  runProofreaderAgent,
+  runProposalWriterAgent,
+  runSurveyDesignerAgent,
+  runPressReleaseAgent,
+  runSqlQueryAgent,
+  runApiDocsAgent,
   AgentRunResult,
 } from '../agents/marketplaceAgents';
 import { AgentInvocationRequest } from '../types';
@@ -80,5 +96,21 @@ router.post('/resume-writer', agentEndpoint(runResumeWriterAgent));
 router.post('/social-media', agentEndpoint(runSocialMediaAgent));
 router.post('/email-copywriter', agentEndpoint(runEmailCopywriterAgent));
 router.post('/business-plan', agentEndpoint(runBusinessPlanAgent));
+router.post('/video-script', agentEndpoint(runVideoScriptAgent));
+router.post('/podcast-notes', agentEndpoint(runPodcastNotesAgent));
+router.post('/logo-concept', agentEndpoint(runLogoConceptAgent));
+router.post('/ux-microcopy', agentEndpoint(runUxMicrocopyAgent));
+router.post('/cover-letter', agentEndpoint(runCoverLetterAgent));
+router.post('/linkedin-optimizer', agentEndpoint(runLinkedinOptimizerAgent));
+router.post('/ad-copy', agentEndpoint(runAdCopyAgent));
+router.post('/support-script', agentEndpoint(runSupportScriptAgent));
+router.post('/product-description', agentEndpoint(runProductDescriptionAgent));
+router.post('/keyword-research', agentEndpoint(runKeywordResearchAgent));
+router.post('/proofreader', agentEndpoint(runProofreaderAgent));
+router.post('/proposal-writer', agentEndpoint(runProposalWriterAgent));
+router.post('/survey-designer', agentEndpoint(runSurveyDesignerAgent));
+router.post('/press-release', agentEndpoint(runPressReleaseAgent));
+router.post('/sql-query', agentEndpoint(runSqlQueryAgent));
+router.post('/api-docs', agentEndpoint(runApiDocsAgent));
 
 export default router;

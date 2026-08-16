@@ -73,6 +73,10 @@ export interface Freelancer {
   resumeSource?: ResumeSource;
   resumeUpdatedAt?: string;
   skillVerification?: SkillVerificationResult;
+  paystackRecipientCode?: string;
+  bankCode?: string;
+  accountNumber?: string;
+  accountName?: string;
 }
 
 export interface Recruiter {
@@ -102,6 +106,11 @@ export interface AgentDeveloper {
   completedTasks: number;
   createdAt: string;
   whatsappNumber?: string;
+  paystackRecipientCode?: string;
+  bankCode?: string;
+  accountNumber?: string;
+  accountName?: string;
+  currency?: string;
 }
 
 export type AgentCategory =

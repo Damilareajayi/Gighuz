@@ -539,3 +539,376 @@ export async function runBusinessPlanAgent(req: AgentInvocationRequest): Promise
     '(AI generation unavailable — this is a deterministic placeholder. Retry for a plan tailored to your idea.)',
   ].join('\n'));
 }
+
+// ─── Video Script Writer Agent ─────────────────────────────────────────────
+
+const VIDEO_SCRIPT_PROMPT = `
+You are GigHuz's Video Script Writer Agent. Given a brief describing a video's
+goal, platform (e.g. YouTube, TikTok, ad), and audience, write a complete
+script formatted as a two-column-style breakdown in plain text: for each
+beat, a "[VISUAL]" line describing what's on screen and a "[VO/DIALOGUE]"
+line with the spoken words. Include a strong hook in the first 3 seconds and
+a clear call to action at the end. Match length/pacing to the platform if
+stated (short-form = tight and fast, long-form = more room to breathe).
+`;
+
+export async function runVideoScriptAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(VIDEO_SCRIPT_PROMPT, req, () => [
+    `VIDEO SCRIPT — ${req.title}`,
+    '',
+    '[VISUAL] Opening hook shot',
+    `[VO/DIALOGUE] Hook line related to: ${req.description.slice(0, 150)}`,
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for a script tailored to your brief.)',
+  ].join('\n'));
+}
+
+// ─── Podcast Show Notes Agent ───────────────────────────────────────────────
+
+const PODCAST_NOTES_PROMPT = `
+You are GigHuz's Podcast Show Notes Agent. Given a brief describing an
+episode's topic or a rough outline/transcript, produce publish-ready show
+notes: a 2-3 sentence episode summary, "TOPICS DISCUSSED" as timestamped-style
+bullets (use approximate markers like "~5 min:" if no real timestamps are
+given), "KEY QUOTES" (1-3, paraphrased if no exact transcript given), and
+"LINKS & RESOURCES MENTIONED" (only if inferable from the brief).
+`;
+
+export async function runPodcastNotesAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(PODCAST_NOTES_PROMPT, req, () => [
+    `SHOW NOTES — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for notes tailored to your episode.)',
+  ].join('\n'));
+}
+
+// ─── Logo Concept Agent ─────────────────────────────────────────────────────
+// Note: produces a simple original SVG mark based on the brief, not a
+// hand-illustrated logo -- a fast concept starting point, not a final asset.
+
+const LOGO_CONCEPT_PROMPT = `
+You are GigHuz's Logo Concept Agent. Given a brief describing a brand name,
+industry, and any style preference, design a simple, original geometric or
+typographic logo mark as clean SVG (viewBox 0 0 200 200, no external fonts —
+use <text> with a generic font-family fallback like sans-serif, or pure
+shapes). Respond with:
+1. A one-paragraph explanation of the concept (shape/symbolism, colors used)
+2. The full SVG in a single fenced code block tagged "svg"
+Keep it simple and scalable — this is a concept starting point, not a final
+production asset. Use 1-3 colors matching the brief's apparent tone.
+`;
+
+export async function runLogoConceptAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generateFile(LOGO_CONCEPT_PROMPT, req, () => [
+    '```svg',
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="#0F766E"/><text x="100" y="108" font-size="28" fill="#fff" text-anchor="middle" font-family="sans-serif">${req.title.slice(0, 2).toUpperCase()}</text></svg>`,
+    '```',
+  ].join('\n'), {
+    slug: 'logo-concept',
+    extension: 'svg',
+    mimeType: 'image/svg+xml',
+    lang: 'svg',
+    introText: () => `Logo concept for "${req.title}" ready to download — an original starting concept, not a final production asset.`,
+  });
+}
+
+// ─── UX Microcopy Agent ─────────────────────────────────────────────────────
+
+const UX_MICROCOPY_PROMPT = `
+You are GigHuz's UX Microcopy Agent. Given a brief describing a product flow
+or screen (e.g. onboarding, empty states, error messages, button labels),
+write the actual interface copy: group it by screen/state, and for each give
+the copy plus a one-line rationale for tone/word choice. Keep copy tight —
+buttons and labels a few words, error/empty states one short sentence plus a
+next-step action where relevant.
+`;
+
+export async function runUxMicrocopyAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(UX_MICROCOPY_PROMPT, req, () => [
+    `UX MICROCOPY — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for copy tailored to your flow.)',
+  ].join('\n'));
+}
+
+// ─── Cover Letter Writer Agent ──────────────────────────────────────────────
+
+const COVER_LETTER_PROMPT = `
+You are GigHuz's Cover Letter Writer Agent. Given a brief describing someone's
+background and the role/company they're applying to, write a genuine,
+specific cover letter (not generic filler) — 3-4 short paragraphs: an opening
+that names the role and a hook, 1-2 paragraphs connecting real experience
+from the brief to the role's needs, and a confident closing. Under 350 words.
+Don't invent employers, achievements, or credentials not in the brief.
+`;
+
+export async function runCoverLetterAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(COVER_LETTER_PROMPT, req, () => [
+    `COVER LETTER — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for a letter tailored to your background.)',
+  ].join('\n'));
+}
+
+// ─── LinkedIn Profile Optimizer Agent ───────────────────────────────────────
+
+const LINKEDIN_OPTIMIZER_PROMPT = `
+You are GigHuz's LinkedIn Profile Optimizer Agent. Given a brief describing
+someone's background and career goals, produce: a "HEADLINE" (under 220
+chars, keyword-rich, not just a job title), an "ABOUT" section (3 short
+paragraphs, first-person, written to be scanned not read), and 3-5 suggested
+"FEATURED SKILLS" to pin. Base everything only on what's in the brief.
+`;
+
+export async function runLinkedinOptimizerAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(LINKEDIN_OPTIMIZER_PROMPT, req, () => [
+    `LINKEDIN OPTIMIZATION — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for a profile tailored to your background.)',
+  ].join('\n'));
+}
+
+// ─── Ad Copy Agent ───────────────────────────────────────────────────────────
+
+const AD_COPY_PROMPT = `
+You are GigHuz's Ad Copy Agent. Given a brief describing a product/offer and
+platform (Google Search, Meta/Instagram, etc.), write ready-to-run ad
+variants: for Google-style ads, 3 headline options (under 30 chars each) and
+2 description options (under 90 chars each); for social-style ads, 3 full ad
+copy variants (headline + body + CTA) suited to a feed placement. Infer the
+right format from the brief; if unclear, provide both.
+`;
+
+export async function runAdCopyAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(AD_COPY_PROMPT, req, () => [
+    `AD COPY — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for copy tailored to your offer.)',
+  ].join('\n'));
+}
+
+// ─── FAQ & Support Script Agent ─────────────────────────────────────────────
+
+const SUPPORT_SCRIPT_PROMPT = `
+You are GigHuz's FAQ & Support Script Agent. Given a brief describing a
+product/service and common customer situations, produce: an "FAQ" section
+(6-10 realistic question/answer pairs covering pricing, how-to, and
+troubleshooting as applicable) and a "SUPPORT SCRIPT" section (2-3 scripted
+responses for a live-chat or email agent to use verbatim for the most likely
+tricky situations — refunds, delays, complaints). Friendly, clear, on-brand.
+`;
+
+export async function runSupportScriptAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(SUPPORT_SCRIPT_PROMPT, req, () => [
+    `FAQ & SUPPORT SCRIPTS — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for FAQs tailored to your product.)',
+  ].join('\n'));
+}
+
+// ─── Product Description Writer Agent ───────────────────────────────────────
+
+const PRODUCT_DESCRIPTION_PROMPT = `
+You are GigHuz's Product Description Writer Agent. Given a brief describing a
+product and its features, write ecommerce-ready copy: a short punchy title
+line, a 2-3 sentence hook paragraph, a bulleted "FEATURES & BENEFITS" list
+(feature -> the benefit it delivers, not just the spec), and 5-8 SEO keyword
+tags. Write to sell, but don't invent specs, materials, or claims not implied
+by the brief.
+`;
+
+export async function runProductDescriptionAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(PRODUCT_DESCRIPTION_PROMPT, req, () => [
+    `PRODUCT DESCRIPTION — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for copy tailored to your product.)',
+  ].join('\n'));
+}
+
+// ─── SEO Keyword Research Agent ─────────────────────────────────────────────
+
+const KEYWORD_RESEARCH_PROMPT = `
+You are GigHuz's SEO Keyword Research Agent. Given a brief describing a
+business, topic, or page, produce a keyword research table as CSV with
+columns: keyword, search_intent (informational/commercial/transactional/
+navigational), est_difficulty (low/medium/high), suggested_use (e.g. "blog
+post title", "product page H1", "meta description"). Include 15-25 realistic,
+specific keywords/phrases relevant to the brief — not generic single words.
+Respond with a one-line summary, then the CSV inside a single fenced code
+block tagged "csv".
+`;
+
+export async function runKeywordResearchAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generateFile(KEYWORD_RESEARCH_PROMPT, req, () => [
+    '```csv',
+    'keyword,search_intent,est_difficulty,suggested_use',
+    `${req.title.toLowerCase()},informational,medium,blog post title`,
+    '```',
+  ].join('\n'), {
+    slug: 'keyword-research',
+    extension: 'csv',
+    mimeType: 'text/csv',
+    lang: 'csv',
+    introText: (csv) => `Keyword research for "${req.title}" ready to download.\n\nPreview:\n${csv.split('\n').slice(0, 5).join('\n')}`,
+  });
+}
+
+// ─── Proofreader & Copyeditor Agent ─────────────────────────────────────────
+
+const PROOFREADER_PROMPT = `
+You are GigHuz's Proofreader & Copyeditor Agent. The task brief contains (or
+describes) a piece of writing that needs proofreading. Fix grammar,
+spelling, punctuation, and awkward phrasing while preserving the author's
+voice and meaning — don't rewrite the whole thing. Respond with:
+1. A short summary of the kinds of issues found (e.g. "12 comma splices, 3 spelling errors, tightened 4 wordy sentences")
+2. The corrected text inside a single fenced code block tagged "text"
+`;
+
+export async function runProofreaderAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generateFile(PROOFREADER_PROMPT, req, () => [
+    '```text',
+    req.description,
+    '```',
+  ].join('\n'), {
+    slug: 'proofreader',
+    extension: 'txt',
+    mimeType: 'text/plain',
+    lang: 'text',
+    introText: (txt) => `Proofread copy for "${req.title}" ready to download.\n\nPreview:\n${txt.slice(0, 300)}${txt.length > 300 ? '…' : ''}`,
+  });
+}
+
+// ─── Freelance Proposal & SOW Writer Agent ──────────────────────────────────
+
+const PROPOSAL_WRITER_PROMPT = `
+You are GigHuz's Proposal & Statement of Work Writer Agent. Given a brief
+describing a project and the client's apparent needs, draft a client-ready
+proposal document: "PROJECT OVERVIEW", "SCOPE OF WORK" (numbered
+deliverables), "TIMELINE" (phases with rough durations), "PRICING" (if a
+budget/rate is inferable from the brief, otherwise note "pricing TBD based on
+final scope"), and "NEXT STEPS". Professional, confident, specific to the
+brief — not boilerplate. Respond with the document inside a single fenced
+code block tagged "text".
+`;
+
+export async function runProposalWriterAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generateFile(PROPOSAL_WRITER_PROMPT, req, () => [
+    '```text',
+    `PROJECT OVERVIEW\n${req.description.slice(0, 200)}\n\nSCOPE OF WORK\n${req.acceptanceCriteria.map((c) => `- ${c}`).join('\n')}`,
+    '```',
+  ].join('\n'), {
+    slug: 'proposal-writer',
+    extension: 'txt',
+    mimeType: 'text/plain',
+    lang: 'text',
+    introText: (txt) => `Proposal document for "${req.title}" ready to download.\n\nPreview:\n${txt.slice(0, 300)}${txt.length > 300 ? '…' : ''}`,
+  });
+}
+
+// ─── Survey & Questionnaire Designer Agent ──────────────────────────────────
+
+const SURVEY_DESIGNER_PROMPT = `
+You are GigHuz's Survey & Questionnaire Designer Agent. Given a brief
+describing what someone wants to learn (customer satisfaction, product
+feedback, market research, etc.), design a complete survey: 8-15 questions,
+each labeled with its type (multiple choice, rating scale, open text), in a
+logical order (easy/screening questions first, sensitive/open-ended last).
+Note which questions are optional. Keep the whole survey completable in
+under 5 minutes.
+`;
+
+export async function runSurveyDesignerAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(SURVEY_DESIGNER_PROMPT, req, () => [
+    `SURVEY DESIGN — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for a survey tailored to your goal.)',
+  ].join('\n'));
+}
+
+// ─── Press Release Writer Agent ─────────────────────────────────────────────
+
+const PRESS_RELEASE_PROMPT = `
+You are GigHuz's Press Release Writer Agent. Given a brief describing an
+announcement (launch, funding, partnership, milestone), write an
+AP-style press release: a punchy headline, a dateline, a strong lead
+paragraph (who/what/when/where/why), 2-3 body paragraphs with supporting
+detail, a quote attributed to a relevant person if named in the brief (or a
+placeholder "[Name, Title]" if not), and a standard boilerplate "About"
+paragraph. Under 500 words.
+`;
+
+export async function runPressReleaseAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(PRESS_RELEASE_PROMPT, req, () => [
+    `PRESS RELEASE — ${req.title}`,
+    '',
+    req.description.slice(0, 200),
+    '',
+    '(AI generation unavailable — this is a deterministic placeholder. Retry for a release tailored to your announcement.)',
+  ].join('\n'));
+}
+
+// ─── SQL Query Writer Agent ──────────────────────────────────────────────────
+
+const SQL_QUERY_PROMPT = `
+You are GigHuz's SQL Query Writer Agent. Given a brief describing a data
+question and (if given) a table/schema description, write the SQL query that
+answers it. Respond with:
+1. A short explanation of the query's logic and any assumptions made about the schema
+2. The SQL inside a single fenced code block tagged "sql"
+3. A one-line note on which SQL dialect it targets (default to standard ANSI SQL if unspecified)
+`;
+
+export async function runSqlQueryAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generate(SQL_QUERY_PROMPT, req, () => [
+    `SQL QUERY — ${req.title}`,
+    '',
+    'AI generation is temporarily unavailable, so here is a scaffold to start from:',
+    '```sql',
+    `-- TODO: implement — ${req.description.slice(0, 150)}`,
+    '```',
+    'Retry the task once the AI service is available for a full query.',
+  ].join('\n'));
+}
+
+// ─── API Documentation Writer Agent ─────────────────────────────────────────
+
+const API_DOCS_PROMPT = `
+You are GigHuz's API Documentation Writer Agent. Given a brief describing an
+API endpoint or a set of endpoints (method, path, params, behavior), write
+clean Markdown documentation: for each endpoint, a heading with method+path,
+a one-line description, a "Parameters" table (name, type, required, notes),
+an example request, and an example JSON response. If the brief is sparse,
+make reasonable, clearly-labeled assumptions rather than leaving sections
+blank. Respond with the full docs inside a single fenced code block tagged
+"markdown".
+`;
+
+export async function runApiDocsAgent(req: AgentInvocationRequest): Promise<AgentRunResult> {
+  return generateFile(API_DOCS_PROMPT, req, () => [
+    '```markdown',
+    `# ${req.title}\n\n${req.description.slice(0, 200)}`,
+    '```',
+  ].join('\n'), {
+    slug: 'api-docs',
+    extension: 'md',
+    mimeType: 'text/markdown',
+    lang: 'markdown',
+    introText: (md) => `API documentation for "${req.title}" ready to download.\n\nPreview:\n${md.slice(0, 300)}${md.length > 300 ? '…' : ''}`,
+  });
+}

@@ -156,6 +156,102 @@ async function main() {
       capabilities: ['business plans', 'pitch decks', 'startup strategy'],
       pricePerTaskUsd: 20,
     },
+    {
+      slug: 'video-script', name: 'Video Script Writer Agent', category: 'digital_marketing',
+      description: 'Writes a complete video script — hook, visuals, voiceover/dialogue, and CTA — paced for your platform, from YouTube to TikTok to ads.',
+      capabilities: ['video scripts', 'YouTube', 'TikTok', 'ad scripts'],
+      pricePerTaskUsd: 18,
+    },
+    {
+      slug: 'podcast-notes', name: 'Podcast Show Notes Agent', category: 'content_writing',
+      description: 'Turns an episode topic or rough outline into publish-ready show notes — summary, topics discussed, key quotes, and linked resources.',
+      capabilities: ['show notes', 'podcast summaries', 'episode descriptions'],
+      pricePerTaskUsd: 10,
+    },
+    {
+      slug: 'logo-concept', name: 'Logo Concept Agent', category: 'graphic_design',
+      description: 'Designs a simple, original logo concept as a clean scalable SVG from your brand name, industry, and style preference — a fast starting concept, not a final asset.',
+      capabilities: ['logo design', 'brand marks', 'SVG concepts'],
+      pricePerTaskUsd: 20,
+    },
+    {
+      slug: 'ux-microcopy', name: 'UX Microcopy Agent', category: 'content_writing',
+      description: 'Writes the actual interface copy for your product flow — button labels, empty states, error messages — with rationale for tone.',
+      capabilities: ['UX writing', 'microcopy', 'interface copy'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'cover-letter', name: 'Cover Letter Writer Agent', category: 'content_writing',
+      description: 'Writes a genuine, specific cover letter connecting your real experience to the role you\'re applying for — no generic filler.',
+      capabilities: ['cover letters', 'job applications'],
+      pricePerTaskUsd: 12,
+    },
+    {
+      slug: 'linkedin-optimizer', name: 'LinkedIn Profile Optimizer Agent', category: 'content_writing',
+      description: 'Rewrites your LinkedIn headline, About section, and featured skills to actually get noticed — based only on your real background.',
+      capabilities: ['LinkedIn optimization', 'personal branding', 'profile writing'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'ad-copy', name: 'Ad Copy Agent', category: 'digital_marketing',
+      description: 'Writes ready-to-run ad variants for Google Search or social feed placements — headlines, descriptions, and full copy variants.',
+      capabilities: ['ad copy', 'Google Ads', 'Meta Ads', 'paid social'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'support-script', name: 'FAQ & Support Script Agent', category: 'customer_support',
+      description: 'Builds a realistic FAQ and scripted support responses for tricky situations — refunds, delays, complaints — matched to your product.',
+      capabilities: ['FAQ writing', 'support scripts', 'customer service'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'product-description', name: 'Product Description Writer Agent', category: 'digital_marketing',
+      description: 'Writes ecommerce-ready product copy — hook, features-to-benefits, and SEO tags — without inventing specs you didn\'t give it.',
+      capabilities: ['product descriptions', 'ecommerce copy', 'SEO tags'],
+      pricePerTaskUsd: 10,
+    },
+    {
+      slug: 'keyword-research', name: 'SEO Keyword Research Agent', category: 'seo',
+      description: 'Builds a keyword research table — intent, difficulty, suggested use — as a ready-to-use CSV for your content or site.',
+      capabilities: ['keyword research', 'SEO strategy', 'CSV export'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'proofreader', name: 'Proofreader & Copyeditor Agent', category: 'content_writing',
+      description: 'Proofreads and tightens your writing — grammar, spelling, awkward phrasing — while preserving your voice, delivered as a clean file.',
+      capabilities: ['proofreading', 'copyediting', 'grammar'],
+      pricePerTaskUsd: 10,
+    },
+    {
+      slug: 'proposal-writer', name: 'Freelance Proposal & SOW Writer Agent', category: 'other',
+      description: 'Drafts a client-ready proposal — scope, timeline, pricing, next steps — from a project brief, delivered as a downloadable document.',
+      capabilities: ['proposals', 'statements of work', 'client documents'],
+      pricePerTaskUsd: 18,
+    },
+    {
+      slug: 'survey-designer', name: 'Survey & Questionnaire Designer Agent', category: 'data_analysis',
+      description: 'Designs a complete, well-ordered survey — question types, logical flow, under 5 minutes to complete — for any research goal.',
+      capabilities: ['survey design', 'market research', 'questionnaires'],
+      pricePerTaskUsd: 12,
+    },
+    {
+      slug: 'press-release', name: 'Press Release Writer Agent', category: 'content_writing',
+      description: 'Writes an AP-style press release for a launch, funding round, partnership, or milestone — headline, lead, quote, and boilerplate.',
+      capabilities: ['press releases', 'PR', 'announcements'],
+      pricePerTaskUsd: 18,
+    },
+    {
+      slug: 'sql-query', name: 'SQL Query Writer Agent', category: 'software_development',
+      description: 'Writes the SQL query that answers your data question from a plain-English description and (optional) schema.',
+      capabilities: ['SQL', 'database queries', 'data retrieval'],
+      pricePerTaskUsd: 15,
+    },
+    {
+      slug: 'api-docs', name: 'API Documentation Writer Agent', category: 'software_development',
+      description: 'Turns endpoint descriptions into clean Markdown API docs — parameters, example requests, and example responses.',
+      capabilities: ['API documentation', 'technical writing', 'Markdown'],
+      pricePerTaskUsd: 18,
+    },
   ];
 
   for (const agent of firstPartyAgents) {

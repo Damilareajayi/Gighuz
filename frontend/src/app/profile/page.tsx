@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { RequireAuth } from '@/components/RequireAuth';
 import { ErrorBanner } from '@/components/ErrorBanner';
+import { PayoutMethodCard } from '@/components/PayoutMethodCard';
 import { Star, MapPin, DollarSign, ExternalLink, Camera, FileText, Sparkles, Upload, ShieldCheck, BadgeCheck } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Freelancer, CaseStudy } from '@/lib/types';
@@ -326,8 +327,20 @@ function ProfileContent() {
               </div>
             )}
 
+            <PayoutMethodCard
+              country={profile.country}
+              initial={{
+                bankCode: profile.bankCode,
+                accountNumber: profile.accountNumber,
+                accountName: profile.accountName,
+                currency: profile.currency,
+                paystackRecipientCode: profile.paystackRecipientCode,
+              }}
+              onSaved={(fields) => setProfile(p => p && { ...p, ...fields })}
+            />
+
             <div className="card space-y-3">
-              <p className="section-label">Payout Settings</p>
+              <p className="section-label">Account</p>
               <div className="text-sm space-y-2">
                 <div className="flex justify-between py-2 border-b border-surface-border">
                   <span className="text-gray-500">WhatsApp</span>
